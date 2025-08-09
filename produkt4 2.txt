@@ -1,0 +1,101 @@
+Titel
+
+Informativ, præcis, uden tekniske detaljer.
+
+Skal indeholde antal eller størrelse, hvis relevant.
+
+SEO-optimeret med relevante søgeord, men naturlig og letlæselig.
+
+Unik, på dansk uden engelske ord eller tekniske termer.
+
+Enkel og klar stil uden apostrofer og specialtegn.
+
+Op til 80 tegn inkl. mellemrum.
+
+Kort beskrivelse (uden HTML)
+
+Maks 4–6 sætninger.
+
+Beskriv, hvad produktet er, hvad det bruges til, og hvilken fordel det har for dyret.
+
+Nævn tydeligt hvilket dyr produktet er til (hund, kat, fugl, fisk).
+
+Naturligt, venligt sprog uden teknisk jargon, engelske ord eller specialtegn.
+
+Unik, dynamisk og letlæselig.
+
+Lang beskrivelse og vigtige informationer i samlet HTML-boks
+
+Korrekt og flydende dansk med levende, engagerende sprog til dyreejere.
+
+Brug kun <h2> til overskrifter (ingen andre overskrifts-tags).
+
+Min. 8 unikke, relevante overskrifter, max 3 med kategori, produktfunktion eller egenskaber.
+
+Hver overskrift efterfølges af 7–8 sætninger.
+
+Indsæt linjeafstand (<p>&nbsp;</p>) efter hvert afsnit, undtagen i afsnittet "Vigtige informationer".
+
+Brug HTML-entiteter for æ, ø, å og bindestreger (–).
+
+Max ét naturligt internt link pr. overskrift, kontekstuelt relevant og naturligt integreret.
+
+Links skal fordeles jævnt i teksten, max 1–2 links pr. afsnit, aldrig samlet i slutningen.
+
+Undgå “div”, inline CSS, specialformatering eller teknisk sprog.
+
+Husk at indsætte links fordelt naturligt gennem hele teksten, max ét link til samme kategori i hele teksten.
+
+Afsnittet "Vigtige informationer" skal være en del af samme HTML-boks, men uden linjeafstand og uden links. Det tæller ikke som en overskrift med link.
+
+Format for Vigtige informationer (uden linjeafstand):
+
+<h2>Vigtige informationer</h2> <p><strong>Type:</strong> [type]</p> <p><strong>Velegnet til:</strong> [dyr]</p> <p><strong>Materiale:</strong> [materiale]</p> <p><strong>Justering:</strong> [mål]</p> <p><strong>Opbevaring:</strong> [opbevaringsvejledning]</p>
+SEO
+
+Brug relevante søgeord naturligt.
+
+Alt-tekst til billeder skal være på dansk med relevante søgeord.
+
+Undgå engelske ord og tekniske termer.
+
+Meta description må gerne nævne størrelse.
+
+Sidetitel (max 60 tegn)
+
+SEO-optimeret med hovedsøgeord og generel beskrivelse.
+
+Kort, informativ og præcis.
+
+Meta description (max 160 tegn)
+
+Kort, SEO-optimeret, beskrivende og letlæselig.
+
+Indeholder relevante søgeord og kan nævne størrelse.
+
+Links og interne referencer
+
+Spørg altid om ønskede interne links til hvert produkt, før der laves tekst.
+
+Integrer max ét link pr. overskrift, fordelt jævnt gennem hele teksten — ét ad gangen.
+
+Undgå at samle flere links i samme afsnit eller samtidig.
+
+Link til relevante kategorier som Hunter Vario seler, Hundesnor, Hundetegn, Hundetøj og Hundefoder (fx Natura Diet), hvis relevant.
+
+Links skal være naturlige, kontekstuelle og aldrig påklistrede.
+
+Sprog og stil
+
+Naturligt, venligt og tilpasset almindelige dyreejere.
+
+Undgå teknisk jargon, engelske termer, apostrofer og specialtegn i titler og overskrifter.
+
+Teksten skal kunne bruges direkte i webshoppen, guide, inspirere og understøtte salg uden at virke “pushy”.
+
+Spørg omkring hvilke links jeg vil have med og giv gerne 10 relevante forslag før du starter på produktet
+
+skriv en historie som giver mening det kan være i kombi med produktet og et links. (feks. vådfoder og slikkemåtter)
+
+Produkt: [ ]
+Yderligere info: [ ]
