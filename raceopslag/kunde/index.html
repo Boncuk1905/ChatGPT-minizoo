@@ -255,7 +255,7 @@ h1{font-size:clamp(27px,5.7vw,39px);line-height:1.1;letter-spacing:-.025em;margi
 <script id="model-data" type="application/json">[{"maker":"HUNTER","name":"Uppsala","url":"https://www.hunter.de/files/publisher/downloads/dateien/HC260070_Hundebekleidung%202026.pdf","sizes":[25,27.5,30,32.5,35,37.5,40,42.5,45,47.5,50,55,60,65,70,75,80],"ranges":null,"note":"Nominelle modelstørrelser (ryglængde). Mellemstørrelser på 2,5 cm. Se hals- og brystmål på den konkrete vare."},{"maker":"Non-stop dogwear","name":"Glacier jacket 2.0","url":"https://www.nonstopdogwear.com/products/glacier-jacket-2/","sizes":[24,27,30,33,36,40,45,50,55,60,65,70,80,90],"ranges":[[22,26],[26,29],[28,32],[31,35],[33,39],[37,43],[42,48],[47,53],[52,58],[57,63],[62,68],[64,76],[74,86],[84,96]],"note":"Producentens intervaller for hundens ryglængde. Tjek brystmål og pasform."},{"maker":"Non-stop dogwear","name":"Fjord raincoat","url":"https://www.nonstopdogwear.com/products/fjord-raincoat/","sizes":[24,27,30,33,36,40,45,50,55,60,65,70,80,90],"ranges":[[22,26],[25,29],[28,32],[31,35],[33,39],[37,43],[42,48],[47,53],[52,58],[57,63],[62,68],[64,76],[74,86],[84,96]],"note":"Producentens intervaller for hundens ryglængde. Tjek brystmål og pasform."},{"maker":"Non-stop dogwear","name":"Wool dog jacket","url":"https://www.nonstopdogwear.com/products/wool-dog-jacket/","sizes":[27,30,33,36,40,45,50,55,60,65,70],"ranges":[[25,29],[28,32],[31,35],[33,39],[37,43],[42,48],[47,53],[52,58],[57,63],[62,68],[64,76]],"note":"Producentens intervaller for hundens ryglængde. Tjek brystmål og pasform."}]</script>
 <script>
 (()=>{'use strict';
-const DATA=JSON.parse(document.getElementById('race-data').textContent);
+let DATA=JSON.parse(document.getElementById('race-data').textContent);
 const search=document.getElementById('search'),cards=document.getElementById('cards'),count=document.getElementById('count'),more=document.getElementById('more'),clear=document.getElementById('clear');
 let active='all',showAll=false;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -270,7 +270,7 @@ function sourceType(s){return s.type==='studie'?'Forskningsmåling':s.type==='ra
 function sourceRow(s){let value=s.type==='studie'?`Målt middelværdi: ${num(s.value)} cm${s.n?' · n = '+num(s.n):''}`:s.range?`Angivet rygmål / modelstørrelse: ${num(s.range[0])}${s.range[0]!==s.range[1]?'–'+num(s.range[1]):''} cm`:'Ukendt mål';return `<div class="sourcerow"><div class="sourcetype">${sourceType(s)}</div><a class="sourcename" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.source)}</a><div class="sourceval">${value}</div>${s.note?`<div class="small">${esc(s.note)}</div>`:''}</div>`}
 function fitRows(v){if(!hasSpecial(v))return '';return `<h3>Særskilte producentstørrelser og pasformer</h3>${v.specialFits.map(s=>`<div class="fitset"><div><strong>${esc(s.label)}</strong> · <a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.maker)}</a></div><div class="chips">${s.sizes.map(x=>`<span>${esc(x)}</span>`).join('')}</div>${s.fitRanges?`<table><thead><tr><th>Str.</th><th>Rygmål</th><th>Brystmål</th></tr></thead><tbody>${s.fitRanges.map(x=>`<tr><td>${esc(x[0])}</td><td>${esc(x[1])} cm</td><td>${esc(x[2])} cm</td></tr>`).join('')}</tbody></table>`:''}<div class="small">${esc(s.note)}</div></div>`).join('')}`}
 
-const BRAND_MODELS=JSON.parse(document.getElementById('model-data').textContent);
+let BRAND_MODELS=JSON.parse(document.getElementById('model-data').textContent);
 function modelCompare(v){
  if(hasSpecial(v))return '<div class="modelcompare"><h3>Specialpasform</h3><p class="small">Denne race har en særlig kropsform. Brug dokumenterede specialmål ovenfor; almindelige dækkenstørrelser er ikke automatisk egnede.</p></div>';
  const back=v.back;
@@ -326,6 +326,25 @@ function card(v,i){if(v.back===null||!Number.isFinite(v.back))return missingCard
 function match(v){if(active==='known')return v.back!==null;if(active==='special')return hasSpecial(v);if(active==='study')return v.n_study>0;if(active==='table')return v.n_tables>0;if(active==='producer')return v.quality==='KUN PRODUCENT';if(active==='conflict')return v.quality==='KILDER UENIGE';if(active==='missing')return v.back===null;if(active==='own')return mzOwnFor(v.name).length>0;return true}
 function render(){const query=normalize(search.value),hits=mzData().filter(x=>match(x)&&(!query||normalize(x.name).includes(query)||(x.aliases||[]).some(alias=>normalize(alias).includes(query))));const rank=v=>{if(!query)return 10;const n=normalize(v.name),al=(v.aliases||[]).map(normalize);if(n===query)return 0;if(al.includes(query))return 1;if(n.startsWith(query))return 2;if(al.some(s=>s.startsWith(query)))return 3;if(n.includes(query))return 4;return 5};if(query)hits.sort((a,b)=>rank(a)-rank(b)||((b.back!==null)-(a.back!==null))||a.name.localeCompare(b.name,'da'));const selected=query?hits:showAll?hits:hits.slice(0,24);count.textContent=hits.length+' racer og varianter ('+hits.filter(v=>v.back!==null).length+' med rygmålsdata)'+(query?' fundet':' · klik på en race for flere oplysninger');cards.innerHTML=selected.length?selected.map(card).join(''):'<div class="empty">Ingen resultater. Prøv et kortere racenavn eller vælg Alle racer.</div>';more.hidden=!!query||showAll||hits.length<=24;more.textContent='Vis alle '+hits.length+' racer';clear.hidden=!search.value;cards.querySelectorAll('.cardhead').forEach(button=>button.addEventListener('click',()=>{const detail=document.getElementById(button.getAttribute('aria-controls'));const open=button.getAttribute('aria-expanded')!=='true';button.setAttribute('aria-expanded',String(open));detail.hidden=!open;button.querySelector('.expand').textContent=open?'Skjul kilder ▴':'Vis størrelse, variation og kilder ▾'}))}
 search.addEventListener('input',()=>{showAll=false;render()});clear.addEventListener('click',()=>{search.value='';search.focus();showAll=false;render()});document.getElementById('filters').addEventListener('click',e=>{let b=e.target.closest('button[data-filter]');if(!b)return;active=b.dataset.filter;showAll=false;document.querySelectorAll('#filters button').forEach(x=>x.classList.toggle('active',x===b));render()});more.addEventListener('click',()=>{showAll=true;render()});document.getElementById('methodbutton').addEventListener('click',()=>document.getElementById('method').scrollIntoView({behavior:'smooth',block:'start'}));render();
+async function mzSyncCustomerData(){
+ // The initial data is embedded as a reliable fallback. Read JSON only, never execute staff-page code.
+ try{
+  const response=await fetch('../index.html',{cache:'no-store'});
+  if(!response.ok) return;
+  const source=await response.text();
+  const parser=new DOMParser();
+  const doc=parser.parseFromString(source,'text/html');
+  const racesElement=doc.getElementById('race-data'),modelsElement=doc.getElementById('model-data');
+  if(!racesElement||!modelsElement)return;
+  const freshRaces=JSON.parse(racesElement.textContent),freshModels=JSON.parse(modelsElement.textContent);
+  if(!Array.isArray(freshRaces)||freshRaces.length<400||!Array.isArray(freshModels)||freshModels.length<1)return;
+  DATA=freshRaces;BRAND_MODELS=freshModels;
+  render();
+ }catch(err){
+  // Keep the embedded snapshot visible if live data is unavailable.
+ }
+}
+mzSyncCustomerData();
 })();
 </script>
 </body></html>
