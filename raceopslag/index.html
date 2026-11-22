@@ -220,6 +220,10 @@ h1{font-size:clamp(27px,5.7vw,39px);line-height:1.1;letter-spacing:-.025em;margi
 @media(max-width:520px){.mz-sex-grid{grid-template-columns:1fr}}
 
 .maker-sex{margin-top:14px;padding:10px 12px;background:#f2f7fb;border:1px solid #d6e5f2;border-radius:9px}.maker-sex h3{margin:0 0 9px}.maker-sex table{width:100%;border-collapse:collapse;font-size:12px}.maker-sex td,.maker-sex th{padding:8px;border-bottom:1px solid #dce5ef;text-align:left}.maker-sex th{font-size:11px;color:#507087}.maker-sex p.small{margin:9px 0 0}
+
+.mz-entry-actions a.mz-customer-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:#076f68;border-color:#99d8cd;background:#effbf7}
+.mz-entry-actions a.mz-customer-link:hover{background:#def5ec}
+.mz-customer-share-hint{color:#4f6974;font-size:11px;margin:6px 0 0}
 </style>
 </head>
 <body>
@@ -230,11 +234,13 @@ h1{font-size:clamp(27px,5.7vw,39px);line-height:1.1;letter-spacing:-.025em;margi
 
 <div class="mz-entry-actions" aria-label="Egne butikregistreringer">
   <button id="mz-add-entry" class="mz-primary-add" type="button">＋ Registrer størrelse</button>
+  <a class="mz-import-button mz-customer-link" id="mz-customer-preview" href="./kunde/" target="_blank" rel="noopener noreferrer">Se kundeversion</a><button id="mz-copy-customer" type="button">Kopiér kundelink</button>
   <button id="mz-export" type="button">Hent backup</button>
   <label class="mz-import-button" for="mz-import">Indlæs backup</label>
   <input type="file" id="mz-import" accept=".json,application/json" hidden>
   <span id="mz-own-counter">0 registreringer på denne enhed</span>
 </div>
+<div class="mz-customer-share-hint">Del <strong>kundelinket</strong>, ikke denne butiksside. Kundeversionen indeholder ingen registreringsfunktion.</div>
 <div class="mz-local-hint">Egne registreringer gemmes kun på denne enhed/browser. Købt størrelse er ikke det samme som hundens mål, og registreringerne ændrer ikke raceestimaterne.</div>
 
 <div class="bar"><span id="count" aria-live="polite">Viser racer…</span><button id="methodbutton" type="button">Sådan beregnes tallene</button></div>
@@ -368,6 +374,19 @@ cards.addEventListener('click',e=>{
  const del=e.target.closest('.mz-own-delete');if(del){
   e.preventDefault();if(!confirm('Vil du slette denne størrelsesregistrering?'))return;
   ownEntries=ownEntries.filter(x=>x.id!==del.dataset.id);mzSave();render();
+ }
+});
+
+document.getElementById('mz-copy-customer').addEventListener('click',async ()=>{
+ const customerUrl=new URL('./kunde/',window.location.href).href;
+ const btn=document.getElementById('mz-copy-customer');
+ try{
+  if(!navigator.clipboard||!navigator.clipboard.writeText)throw Error('Clipboard unavailable');
+  await navigator.clipboard.writeText(customerUrl);
+  btn.textContent='Kundelink kopieret ✓';
+  setTimeout(()=>{btn.textContent='Kopiér kundelink'},2600);
+ }catch(err){
+  window.prompt('Kopiér link til kundeversionen:',customerUrl);
  }
 });
 document.getElementById('mz-export').addEventListener('click',()=>{
