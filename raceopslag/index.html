@@ -209,6 +209,16 @@ h1{font-size:clamp(27px,5.7vw,39px);line-height:1.1;letter-spacing:-.025em;margi
 }
 @media print{.mz-row-register,.tablehead span:nth-child(5){display:none}.tablehead{grid-template-columns:minmax(210px,2.5fr) minmax(130px,.9fr) minmax(140px,1fr) minmax(160px,1.1fr)}.mz-race-row{display:block}}
 
+
+.mz-sex-summary{background:white;border:1px solid #d1e6e1;border-radius:10px;padding:12px;margin:10px 0}
+.mz-sex-summary h4{font-size:13px;color:#275a62;margin:0 0 9px}
+.mz-sex-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.mz-sex-cell{background:#f6fafb;border:1px solid #dce9e9;border-radius:9px;padding:10px;font-size:12px;display:grid;gap:5px}
+.mz-sex-cell strong{color:#17655c;font-size:14px}.mz-sex-cell small{color:#718690}
+.mz-sex-cell b{color:#225e5b}.mz-sex-summary p.small{font-size:11px;margin:9px 0 0;line-height:1.4}
+.mz-sex-pill{border:1px solid #d6e8ea;background:#eef7f8;border-radius:5px;font-size:11px;padding:2px 5px;color:#32636c;font-weight:800}
+@media(max-width:520px){.mz-sex-grid{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -238,6 +248,7 @@ h1{font-size:clamp(27px,5.7vw,39px);line-height:1.1;letter-spacing:-.025em;margi
   <div class="mz-entry-grid">
     <label class="wide">Hunderace <input id="mz-field-breed" type="text" list="mz-breed-options" autocomplete="off" maxlength="100" placeholder="Søg eller skriv ny race" required></label>
     <datalist id="mz-breed-options"></datalist>
+    <label>Hundens køn <select id="mz-field-sex"><option value="ukendt">Ikke oplyst</option><option value="han">Han</option><option value="hun">Hun</option></select></label>
     <label>Størrelse købt / prøvet (cm) <input id="mz-field-size" type="number" inputmode="decimal" min="10" max="150" step="0.1" placeholder="Fx 35,5" required></label>
     <label>Hvad skete der? <select id="mz-field-result"><option value="købt">Købt - pasform ikke bekræftet</option><option value="passer">Prøvet - passer</option><option value="passer_ikke">Prøvet - passer ikke</option><option value="købt_passer">Købt og passer</option></select></label>
     <label>Mærke og model (valgfrit) <input id="mz-field-model" type="text" maxlength="120" placeholder="Fx HUNTER Uppsala"></label>
@@ -245,7 +256,7 @@ h1{font-size:clamp(27px,5.7vw,39px);line-height:1.1;letter-spacing:-.025em;margi
     <label>Dato <input id="mz-field-date" type="date" required></label>
     <label class="wide">Note (valgfrit) <textarea id="mz-field-note" rows="2" maxlength="350" placeholder="Fx lidt lang på ryggen, bryst passer"></textarea></label>
   </div>
-  <p class="mz-entry-note">Størrelse 35,5 cm er tilladt. Oplys kun rygmål, hvis hunden faktisk er målt. Undlad navn, telefonnummer og andre kundeoplysninger.</p>
+  <p class="mz-entry-note">Køn er valgfrit. Gamle registreringer forbliver Ikke oplyst. Størrelse 35,5 cm er tilladt. Oplys kun rygmål, hvis hunden faktisk er målt. Undlad navn, telefonnummer og andre kundeoplysninger.</p>
   <p id="mz-entry-error" role="alert" hidden></p>
   <div class="mz-entry-footer"><button type="button" id="mz-entry-cancel">Annuller</button><button class="mz-primary-add" type="submit">Gem registrering</button></div>
 </form>
@@ -296,10 +307,27 @@ const mzOwnRaces=()=>{const keys=new Set(DATA.map(v=>normalize(v.name)));const r
 const mzData=()=>DATA.concat(mzOwnRaces());
 const mzEntryTag=v=>{const n=mzOwnFor(v.name).length;return n?'<span class="tag ownbadge">'+n+' egne</span>':''};
 const mzResultLabel=v=>({købt:'Købt · pasform ukendt',passer:'Prøvet · passer',passer_ikke:'Prøvet · passer ikke',købt_passer:'Købt og passer'})[v]||'Registreret';
+
+const mzSexLabel=x=>x==='han'?'Han':x==='hun'?'Hun':'Ikke oplyst';
+function mzSexSummary(list){
+ if(!list.length)return '';
+ const sections=['han','hun'].map(sex=>{
+   const filtered=list.filter(x=>x.sex===sex);
+   const measured=filtered.map(x=>x.measuredBack).filter(x=>typeof x==='number'&&Number.isFinite(x));
+   const fitted=filtered.filter(x=>x.result==='passer'||x.result==='købt_passer');
+   const average=measured.length?num(Math.round(measured.reduce((a,b)=>a+b,0)/measured.length*10)/10)+' cm (n='+measured.length+')':'Ingen målinger';
+   const sizes=[...new Set(fitted.map(x=>x.size))].sort((a,b)=>a-b).map(num).join(', ');
+   const successful=fitted.length?sizes+' cm (n='+fitted.length+')':'Ingen bekræftede';
+   return '<div class="mz-sex-cell"><strong>'+mzSexLabel(sex)+'</strong><small>'+filtered.length+' registreringer</small><div>Målt ryg: <b>'+average+'</b></div><div>Størrelser der passede: <b>'+successful+'</b></div></div>';
+ }).join('');
+ const unknown=list.filter(x=>x.sex!=='han'&&x.sex!=='hun').length;
+ return '<div class="mz-sex-summary"><h4>Han / hun – lokale erfaringer</h4><div class="mz-sex-grid">'+sections+'</div>'+(unknown?'<p class="small">'+unknown+' uden oplyst køn indgår ikke i sammenligningen.</p>':'')+'<p class="small">Købt uden bekræftet pasform tæller ikke som passende størrelse. Forskellige modeller og få observationer kan give misvisende forskelle.</p></div>';
+}
+
 function ownMarkup(v){
  const list=mzOwnFor(v.name);
  return '<section class="mz-own-panel"><div class="mz-own-header"><h3>Egne størrelsesregistreringer'+(list.length?' ('+list.length+')':'')+'</h3><button class="mz-own-button mz-add-one" type="button" data-race="'+esc(v.name)+'">＋ Registrer</button></div>'
- +(!list.length?'<p class="small">Ingen registreringer endnu. Tilføj en købt eller afprøvet størrelse.</p>':list.map(x=>'<div class="mz-own-row"><div><strong>'+num(x.size)+' cm</strong> · '+esc(mzResultLabel(x.result))+(x.model?' · '+esc(x.model):'')+'<div class="mz-small">'+esc(x.date||'')+(x.measuredBack!==null&&Number.isFinite(x.measuredBack)?' · Målt ryg: '+num(x.measuredBack)+' cm':'')+(x.note?' · '+esc(x.note):'')+'</div></div><button type="button" class="mz-own-delete" data-id="'+esc(x.id)+'" aria-label="Slet denne registrering">Slet</button></div>').join(''))
+ +(!list.length?'<p class="small">Ingen registreringer endnu. Tilføj en købt eller afprøvet størrelse.</p>':mzSexSummary(list)+list.map(x=>'<div class="mz-own-row"><div><strong>'+num(x.size)+' cm</strong> · <span class="mz-sex-pill">'+mzSexLabel(x.sex)+'</span> · '+esc(mzResultLabel(x.result))+(x.model?' · '+esc(x.model):'')+'<div class="mz-small">'+esc(x.date||'')+(x.measuredBack!==null&&Number.isFinite(x.measuredBack)?' · Målt ryg: '+num(x.measuredBack)+' cm':'')+(x.note?' · '+esc(x.note):'')+'</div></div><button type="button" class="mz-own-delete" data-id="'+esc(x.id)+'" aria-label="Slet denne registrering">Slet</button></div>').join(''))
  +'<p class="small">Dette er egne salgs-/prøveoplysninger og indgår ikke i det kildebaserede rygmålsestimat.</p></section>';
 }
 const mzDialog=document.getElementById('mz-entry-dialog'),mzForm=document.getElementById('mz-entry-form');
@@ -325,7 +353,7 @@ mzForm.addEventListener('submit',e=>{
  const measuredRaw=mzFld('back').value.trim(),measuredBack=measuredRaw===''?null:mzGetNumber(measuredRaw);
  const err=document.getElementById('mz-entry-error');
  if(!breed||breed.length>100||size===null||size<10||size>150||measuredBack!==null&&(measuredBack<10||measuredBack>150)){err.textContent='Skriv en race og en gyldig størrelse mellem 10 og 150 cm. Målt ryg er valgfrit.';err.hidden=false;return}
- const entry={id:'mz-'+Date.now()+'-'+Math.random().toString(36).slice(2,10),breed,size,measuredBack,model:mzFld('model').value.trim().slice(0,120),result:mzFld('result').value,date:mzFld('date').value,note:mzFld('note').value.trim().slice(0,350)};
+ const entry={id:'mz-'+Date.now()+'-'+Math.random().toString(36).slice(2,10),breed,sex:mzFld('sex').value,size,measuredBack,model:mzFld('model').value.trim().slice(0,120),result:mzFld('result').value,date:mzFld('date').value,note:mzFld('note').value.trim().slice(0,350)};
  ownEntries.push(entry);const saved=mzSave();mzClose();
  if(active==='missing'||active==='study'||active==='producer'||active==='table'||active==='conflict'){
   active='all';document.querySelectorAll('#filters button').forEach(x=>x.classList.toggle('active',x.dataset.filter==='all'));
@@ -350,7 +378,7 @@ document.getElementById('mz-import').addEventListener('change',async e=>{
  const file=e.target.files?.[0];if(!file)return;
  try{const payload=JSON.parse(await file.text()),incoming=Array.isArray(payload)?payload:payload.records;
  if(!Array.isArray(incoming))throw Error('Filen indeholder ingen registreringer');
- const checked=incoming.filter(x=>x&&typeof x.id==='string'&&typeof x.breed==='string'&&x.breed.length<101&&typeof x.size==='number'&&Number.isFinite(x.size)&&x.size>=10&&x.size<=150).map(x=>({id:x.id,breed:x.breed,size:x.size,measuredBack:typeof x.measuredBack==='number'&&Number.isFinite(x.measuredBack)?x.measuredBack:null,model:String(x.model||'').slice(0,120),result:['købt','passer','passer_ikke','købt_passer'].includes(x.result)?x.result:'købt',date:String(x.date||'').slice(0,10),note:String(x.note||'').slice(0,350)}));
+ const checked=incoming.filter(x=>x&&typeof x.id==='string'&&typeof x.breed==='string'&&x.breed.length<101&&typeof x.size==='number'&&Number.isFinite(x.size)&&x.size>=10&&x.size<=150).map(x=>({id:x.id,breed:x.breed,sex:['han','hun'].includes(x.sex)?x.sex:'ukendt',size:x.size,measuredBack:typeof x.measuredBack==='number'&&Number.isFinite(x.measuredBack)?x.measuredBack:null,model:String(x.model||'').slice(0,120),result:['købt','passer','passer_ikke','købt_passer'].includes(x.result)?x.result:'købt',date:String(x.date||'').slice(0,10),note:String(x.note||'').slice(0,350)}));
  const ids=new Set(ownEntries.map(x=>x.id)),fresh=checked.filter(x=>!ids.has(x.id));ownEntries=ownEntries.concat(fresh);const saved=mzSave();render();alert('Indlæst '+fresh.length+' nye registreringer.'+(saved?'':' Bemærk: Browseren kunne ikke gemme dem permanent.'));
  }catch(err){alert('Backup kunne ikke indlæses: '+err.message)}finally{e.target.value=''}
 });
