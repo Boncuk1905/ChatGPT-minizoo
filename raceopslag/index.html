@@ -318,7 +318,7 @@ function mzSexSummary(list){
    const average=measured.length?num(Math.round(measured.reduce((a,b)=>a+b,0)/measured.length*10)/10)+' cm (n='+measured.length+')':'Ingen målinger';
    const sizes=[...new Set(fitted.map(x=>x.size))].sort((a,b)=>a-b).map(num).join(', ');
    const successful=fitted.length?sizes+' cm (n='+fitted.length+')':'Ingen bekræftede';
-   return '<div class="mz-sex-cell"><strong>'+mzSexLabel(sex)+'</strong><small>'+filtered.length+' registreringer</small><div>Målt ryg: <b>'+average+'</b></div><div>Størrelser der passede: <b>'+successful+'</b></div></div>';
+   return '<div class="mz-sex-cell"><strong>'+mzSexLabel(sex)+'</strong><small>'+filtered.length+' registrering'+(filtered.length===1?'':'er')+'</small><div>Målt ryg: <b>'+average+'</b></div><div>Størrelser der passede: <b>'+successful+'</b></div></div>';
  }).join('');
  const unknown=list.filter(x=>x.sex!=='han'&&x.sex!=='hun').length;
  return '<div class="mz-sex-summary"><h4>Han / hun – lokale erfaringer</h4><div class="mz-sex-grid">'+sections+'</div>'+(unknown?'<p class="small">'+unknown+' uden oplyst køn indgår ikke i sammenligningen.</p>':'')+'<p class="small">Købt uden bekræftet pasform tæller ikke som passende størrelse. Forskellige modeller og få observationer kan give misvisende forskelle.</p></div>';
