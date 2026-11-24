@@ -261,12 +261,37 @@ h1{font-size:clamp(27px,5.7vw,39px);line-height:1.1;letter-spacing:-.025em;margi
 @media(max-width:620px){.mz-dachshund-inline{font-size:9px;padding:2px 5px}.mz-dachshund-tip{padding:10px 11px}}
 
 .mz-ban-note{font-size:11px;line-height:1.48;color:#536e76;background:#eff5f4;border:1px solid #d8e7e3;border-radius:8px;padding:10px 12px;margin:8px 0}.mz-ban-note strong{color:#235c59}
+
+/* Producentens konkrete dækkenvalg er IKKE racegennemsnit */
+.mz-guide-tag{background:#e7effb;color:#315e83}
+.mz-coat-guide{border:1px solid #d6e8f4;background:#f5f9fe;border-radius:11px;padding:11px;margin:13px 0}
+.mz-coat-guide h3{margin:0 0 6px;font-size:13px;color:#275b7c}
+.mz-coat-guide .mz-coat-chip{display:inline-block;padding:5px 7px;margin:4px 5px 4px 0;background:white;border:1px solid #bdd5eb;border-radius:7px;color:#265c79;font-weight:750}
+.mz-coat-guide p{margin:7px 0 3px;font-size:11px;color:#4e7180}
+.mz-coat-guide a{font-size:12px;font-weight:780}
+.missingcard .num-guide{font-size:23px;line-height:1.2;letter-spacing:-.02em;color:#30728b}
+.missingcard .sizecol .hint{max-width:125px}
+.mz-measure-tool{margin:14px 0 15px;background:white;border:1px solid #c8e1df;border-radius:12px;overflow:hidden}
+.mz-measure-tool summary{padding:14px 15px;cursor:pointer;font-size:13px;font-weight:850;color:#076e6b;background:#f0f9f6}
+.mz-measure-body{padding:13px 15px}
+.mz-measure-body .mz-measure-fields{display:flex;align-items:end;gap:9px;flex-wrap:wrap}
+.mz-measure-fields label{font-size:12px;font-weight:750;color:#41616d;display:grid;gap:4px;flex:1 1 135px}
+.mz-measure-fields input{padding:10px;border:1px solid #bed7d9;border-radius:8px;width:100%;max-width:100%}
+.mz-measure-fields button{border:0;border-radius:8px;padding:11px 13px;background:#087e79;color:white;font-weight:780}
+#mz-measure-results{margin-top:13px}
+.mz-measure-table{width:100%;border-collapse:collapse;font-size:12px}
+.mz-measure-table td,.mz-measure-table th{text-align:left;border-top:1px solid #e0eaeb;padding:8px 6px;vertical-align:top}
+.mz-measure-table th{color:#56757e}
+.mz-measure-table td small{display:block;color:#5d7886;font-size:11px}
+.mz-measure-table a{font-weight:760}
+.mz-measure-warning{font-size:11px;color:#6e7680;line-height:1.4;margin:8px 0}
+@media(max-width:620px){.missingcard .num-guide{font-size:19px}.mz-measure-table{font-size:11px}.mz-measure-fields button{flex:1 1 100%}}
 </style>
 </head>
 <body>
 <header class="hero"><div class="wrap"><div class="brand"><span class="paw">🐾</span>MiniZoo · Kundeguide</div><h1>Find vejledende størrelse til din hund</h1><p class="lead">Søg på racen. Se et vejledende startpunkt og producenternes egne størrelser. Særlige pasformer bliver <strong>ikke tvunget ind i 5 cm-trin</strong>.</p><div class="date">Kildegrundlag: november 2026 · 422 racer og varianter</div></div></header>
 <main class="main wrap">
-<section class="searchbox" aria-label="Søgning"><div class="searchrow"><input type="search" id="search" placeholder="Søg fx labrador, gravhund, mops…" autocomplete="off" aria-label="Søg efter hunderace"><button id="clear" type="button" class="clear" aria-label="Ryd søgning" hidden>Ryd</button></div><div id="filters" class="filters" role="group" aria-label="Filtre"><button class="active" data-filter="all">Alle racer</button><button data-filter="known">Med rygmål</button><button data-filter="special">Særlig pasform</button><button data-filter="study">Målte studier</button><button data-filter="table">Racetabeller</button><button data-filter="producer">Kun producent</button><button data-filter="conflict">Kilder uenige</button><button data-filter="missing">Mål mangler</button></div></section>
+<section class="searchbox" aria-label="Søgning"><div class="searchrow"><input type="search" id="search" placeholder="Søg fx labrador, gravhund, mops…" autocomplete="off" aria-label="Søg efter hunderace"><button id="clear" type="button" class="clear" aria-label="Ryd søgning" hidden>Ryd</button></div><div id="filters" class="filters" role="group" aria-label="Filtre"><button class="active" data-filter="all">Alle racer</button><button data-filter="known">Med rygmål</button><button data-filter="special">Særlig pasform</button><button data-filter="study">Målte studier</button><button data-filter="table">Racetabeller</button><button data-filter="producer">Kun producent</button><button data-filter="conflict">Kilder uenige</button><button data-filter="coat">Kun modelvalg</button><button data-filter="missing">Mål mangler</button></div></section>
 <div class="disclaimer"><span class="bubble">ⓘ</span><div><b>Alt er vejledende.</b> Raceopslaget bygger på publicerede målinger, racetabeller og producenternes størrelsesguider. Tallene beskriver <b>et typisk/anslået rygmål</b>, ikke den konkrete hund. Ingen størrelsesanbefaling er en pasformsgaranti; den enkelte models størrelsesguide har altid forrang.</div></div>
 
 
@@ -274,6 +299,23 @@ h1{font-size:clamp(27px,5.7vw,39px);line-height:1.1;letter-spacing:-.025em;margi
 
 <div class="mz-customer-intro"><b>Kundevisning</b> – Du kan søge blandt hunderacer og se producenternes størrelsesråd. Størrelserne er vejledende, og det konkrete produkts størrelsesguide har altid forrang. Der kan ikke registreres eller ændres oplysninger her.</div>
 <div class="mz-ban-note"><strong>Tilpasset danske regler:</strong> De 13 racer, der er forbudt efter hundeloven, er ikke med i denne størrelsesguide. Det gælder også krydsninger, hvori de indgår. Guiden er ikke en vurdering af, om en konkret hund er lovlig. <a href="https://www.foedevarestyrelsen.dk/dyr/om-dyr-og-kaeledyr-til-private/alt-om-kaeledyr/valg-af-kaeledyr/klar-til-hund/hvilken-race-skal-du-vaelge/forbudte-hunderacer" target="_blank" rel="noopener noreferrer">Se Fødevarestyrelsens liste</a>.</div>
+
+<details class="mz-measure-tool" id="mz-measure-tool">
+  <summary>📏 Kender du hundens mål? Find dækkenstørrelse</summary>
+  <div class="mz-measure-body">
+    <p class="mz-measure-warning">Mål fra nakke/skulder til halerod, mens hunden står. Bryst- og halsmål hjælper med det endelige valg, men kan ikke tjekkes automatisk i de aktuelle modeltabeller.</p>
+    <form id="mz-measure-form">
+      <div class="mz-measure-fields">
+        <label>Ryglængde i cm <input id="mz-measure-back" type="number" inputmode="decimal" min="15" max="110" step="0.1" placeholder="Fx 42,5" required></label>
+        <label>Brystmål i cm (valgfrit) <input id="mz-measure-chest" type="number" inputmode="decimal" min="20" max="160" step="0.1" placeholder="Fx 65"></label>
+        <label>Halsmål i cm (valgfrit) <input id="mz-measure-neck" type="number" inputmode="decimal" min="15" max="110" step="0.1" placeholder="Fx 38"></label>
+        <button type="submit">Find modelstørrelser</button>
+      </div>
+    </form>
+    <div id="mz-measure-results" role="status" aria-live="polite"></div>
+  </div>
+</details>
+
 <div class="race-name-explainer">Søg på dansk eller engelsk racenavn. Begge navne viser samme race og samme størrelsesoplysninger. Både DA og EN vises på alle rækker – også når navnet er ens. Mærket 'int. navn' betyder, at vi ikke har dokumenteret et særskilt dansk racenavn. <a href="https://www.dkk.dk/uploads/documents/Udstilling-Events/Katalogfiler/Gruppeliste-til-katalog-2026-FCI-og-NKU.pdf" target="_blank" rel="noopener noreferrer">Kilde: Dansk Kennel Klub, 2026</a>.</div>
 <div class="bar"><span id="count" aria-live="polite">Viser racer…</span><button id="methodbutton" type="button">Sådan beregnes tallene</button></div>
 <div class="tablehead" aria-hidden="true"><span>Hunderace</span><span>Startstørrelse</span><span>Typisk interval</span><span>Kildegrundlag</span></div><div class="cards" id="cards"></div><button id="more" class="more" hidden>Vis alle racer</button>
@@ -342,11 +384,44 @@ function mzGravhundDetail(v){
   '<p>Størrelserne er producentens modelstørrelser, ikke gennemsnitlige rygmål for racen. Se størrelsesoversigterne nedenunder.</p></aside>';
 }
 
+
+function coatGuideMarkup(v){
+ const guides=v.coatGuides||[];
+ if(!guides.length)return '';
+ return '<section class="mz-coat-guide"><h3>Racespecifikke produktstørrelser – ikke målte rygmål</h3>'
+   +guides.map(g=>'<div><strong>'+esc(g.maker)+'</strong> · '+esc(g.model||'Dækken')+'<div>'+g.sizes.map(x=>'<span class="mz-coat-chip">'+num(x)+' cm</span>').join('')+'</div><a href="'+esc(g.url)+'" target="_blank" rel="noopener noreferrer">Se kildens størrelsestabel</a><p>'+esc(g.note||'Vejledende modelstørrelser.')+'</p></div>').join('')
+   +'<p>Mål altid hundens ryg, hals og bryst. Størrelserne gælder denne producent og kan ikke direkte overføres til andre mærker.</p></section>';
+}
+function mzMeasureNow(e){
+ e.preventDefault();
+ const backRaw=document.getElementById('mz-measure-back').value.trim().replace(',','.');
+ const back=Number(backRaw),chest=document.getElementById('mz-measure-chest').value.trim(),neck=document.getElementById('mz-measure-neck').value.trim();
+ const target=document.getElementById('mz-measure-results');
+ if(!backRaw||!Number.isFinite(back)||back<15||back>110){target.textContent='Indtast en gyldig ryglængde mellem 15 og 110 cm.';return}
+ const rows=BRAND_MODELS.map(m=>{
+  const match=m.ranges?m.sizes.map((size,i)=>({size,range:m.ranges[i]})).filter(s=>s.range&&s.range[0]<=back&&back<=s.range[1]):[];
+  if(m.ranges&&!match.length)return '<tr><td><a href="'+esc(m.url)+'" target="_blank" rel="noopener noreferrer">'+esc(m.maker)+'</a><small>'+esc(m.name)+'</small></td><td>Ingen størrelse i de registrerede rygintervaller</td></tr>';
+  const options=m.ranges?match.sort((a,b)=>Math.abs(a.size-back)-Math.abs(b.size-back)).slice(0,3):[...m.sizes].sort((a,b)=>Math.abs(a-back)-Math.abs(b-back)).slice(0,2).map(size=>({size,range:null}));
+  return '<tr><td><a href="'+esc(m.url)+'" target="_blank" rel="noopener noreferrer">'+esc(m.maker)+'</a><small>'+esc(m.name)+'</small></td><td>'+options.map(s=>'<b>'+num(s.size)+' cm</b>'+(s.range?'<small>Ryginterval '+num(s.range[0])+'–'+num(s.range[1])+' cm</small>':'<small>Nærmeste nominelle størrelse – pasform ikke verificeret</small>')).join(' / ')+'</td></tr>';
+ }).join('');
+ target.innerHTML='<strong>Modelmuligheder ved målt ryg '+num(back)+' cm</strong>'
+   +'<table class="mz-measure-table"><thead><tr><th>Mærke/model</th><th>Passende ryginterval / nærmeste størrelse</th></tr></thead><tbody>'+rows+'</tbody></table>'
+   +'<p class="mz-measure-warning">'+(chest||neck?'Du har også angivet bryst/hals, men vi mangler modelvise måleintervaller til at validere dem automatisk. ':'')+'Brug altid producentens aktuelle modelskema til at kontrollere bryst, hals og eventuel specialpasform. Størrelsen kan ikke garanteres ud fra rygmål alene.</p>';
+}
+document.getElementById('mz-measure-form').addEventListener('submit',mzMeasureNow);
+
+
 function missingCard(v,i){
  const reg=v.registry,regLink=reg&&reg.source==="FCI"?'<a href="'+esc(reg.url)+'" target="_blank" rel="noopener noreferrer">Se FCI-registrering og racestandard</a>':'';
- return '<article class="card missingcard"><div class="mz-race-row"><button type="button" class="cardhead" aria-expanded="false" aria-controls="details-'+i+'"><div class="racecol">' + raceNameMarkup(v) + '<div class="race-meta"><span class="tag warning">Rygmål mangler</span>'+mzEntryTag(v)+'<span class="expand">Detaljer <span class="chevron">⌄</span></span></div></div><div class="sizecol"><span class="num unavailable">—</span><span class="hint">Ikke beregnet</span></div><div class="rangecol"><strong class="faded">—</strong><small>Ingen målte data</small></div><div class="basiscol"><strong>Race registreret</strong><small>Intet pålideligt rygmål</small></div></button></div><div class="details" id="details-'+i+'" hidden><div class="summarybox alert"><strong>Ingen sikker racebaseret størrelsesanbefaling</strong><p>Racen kan findes i opslaget, men vi har ikke et dokumenteret rygmål. Vi vil ikke gætte på en størrelse. Kunden bør bruge hundens mål sammen med den konkrete producents måleskema.</p></div><p class="small">'+esc(v.note||'')+'</p>'+regLink+ownMarkup(v)+'</div></article>';
+ const coat=v.coatGuides?.[0],available=!!coat;
+ const shown=available?(coat.sizes.length>1?num(coat.sizes[0])+'–'+num(coat.sizes[coat.sizes.length-1]):num(coat.sizes[0])):'—';
+ return '<article class="card missingcard"><div class="mz-race-row"><button type="button" class="cardhead" aria-expanded="false" aria-controls="details-'+i+'"><div class="racecol">'+raceNameMarkup(v)+'<div class="race-meta"><span class="tag warning">Rygmål mangler</span>'+(available?'<span class="tag mz-guide-tag">Modelvalg fundet</span>':'')+mzEntryTag(v)+'<span class="expand">Detaljer <span class="chevron">⌄</span></span></div></div>'
+ +'<div class="sizecol"><span class="num unavailable'+(available?' num-guide':'')+'">'+shown+'</span>'+(available?'<span class="unit">cm</span>':'')+'<span class="hint">'+(available?'Dækkenstørrelser':'Ikke beregnet')+'</span></div>'
+ +'<div class="rangecol"><strong class="faded">—</strong><small>Intet dokumenteret race-rygmål</small></div>'
+ +'<div class="basiscol"><strong>'+(available?'Producentens modelvalg':'Race registreret')+'</strong><small>'+(available?'Ikke målt racegennemsnit':'Intet pålideligt rygmål')+'</small></div></button>'
+ +''+'</div><div class="details" id="details-'+i+'" hidden><div class="summarybox alert"><strong>'+(available?'Der er en produktstørrelsesguide, men ikke et målt race-rygmål.':'Ingen sikker racebaseret størrelsesanbefaling')+'</strong><p>'+(available?'Størrelserne er forslag til én konkret producentserie. De må ikke opfattes som hundens forventede ryglængde.':'Racen kan findes i opslaget, men vi har ikke et dokumenteret rygmål.')+' Mål altid hunden fra nakke til halerod, og kontroller bryst og hals i den aktuelle models størrelsestabel.</p></div>'
+ +coatGuideMarkup(v)+'<p class="small">'+esc(v.note||'')+'</p>'+regLink+ownMarkup(v)+'</div></article>';
 }
-
 
 function makerSexGuide(v){
  const sex=v.sexGuides||[],vars=v.modelVariants||[];
@@ -371,12 +446,12 @@ function card(v,i){if(v.back===null||!Number.isFinite(v.back))return missingCard
  </button></div><div class="details" id="details-${i}" hidden>
  <div class="summarybox ${caution?'alert':''}"><strong>${special?'Særlig pasform – brug den enkelte models størrelser.':'Begynd omkring str. '+num(five)+' cm i almindelige 5 cm-serier.'}</strong><p>${stud?'Målt studiemiddel':'Beregnet raceestimat'}: ca. ${est} cm. ${esc(v.note||'Store individuelle forskelle forekommer.')} Produktets egen størrelsesguide har forrang.</p></div>
  <dl class="facts"><dt>Kildeinterval</dt><dd>${range?`${num(v.lo)}–${num(v.hi)} cm`:'Ingen direkte raceinterval'}</dd><dt>Producenteksempel</dt><dd>${v.producer===null?'Ikke opgivet':`Ca. ${num(v.producer)} cm, modelafhængigt`}</dd><dt>Datagrundlag</dt><dd>${v.n_study} studieregistrering(er), ${v.n_tables} racetabeller, ${v.n_prods} producentguider</dd></dl>
- ${mzGravhundDetail(v)}${fitRows(v)}${makerSexGuide(v)}${modelCompare(v)}${ownMarkup(v)}
+ ${mzGravhundDetail(v)}${fitRows(v)}${makerSexGuide(v)}${coatGuideMarkup(v)}${modelCompare(v)}${ownMarkup(v)}
  <h3>Kilder og anbefalinger</h3>${(v.sources||[]).map(sourceRow).join('')}
  </div></article>`;
 }
-function match(v){if(active==='known')return v.back!==null;if(active==='special')return hasSpecial(v);if(active==='study')return v.n_study>0;if(active==='table')return v.n_tables>0;if(active==='producer')return v.quality==='KUN PRODUCENT';if(active==='conflict')return v.quality==='KILDER UENIGE';if(active==='missing')return v.back===null;if(active==='own')return mzOwnFor(v.name).length>0;return true}
-function render(){const query=normalize(search.value),hits=mzData().filter(x=>match(x)&&(!query||[x.name,x.nameDa,x.nameEn,...(x.aliases||[])].some(alias=>normalize(alias).includes(query))));const rank=v=>{if(!query)return 10;const n=normalize(v.name),al=[v.nameDa,v.nameEn,...(v.aliases||[])].map(normalize);if(n===query)return 0;if(al.includes(query))return 1;if(n.startsWith(query))return 2;if(al.some(s=>s.startsWith(query)))return 3;if(n.includes(query))return 4;return 5};if(query)hits.sort((a,b)=>rank(a)-rank(b)||((b.back!==null)-(a.back!==null))||a.name.localeCompare(b.name,'da'));const selected=query?hits:showAll?hits:hits.slice(0,24);count.textContent=hits.length+' racer og varianter ('+hits.filter(v=>v.back!==null).length+' med rygmålsdata)'+(query?' fundet':' · klik på en race for flere oplysninger');cards.innerHTML=selected.length?selected.map(card).join(''):'<div class="empty">Ingen resultater. Prøv et kortere racenavn eller vælg Alle racer.</div>';more.hidden=!!query||showAll||hits.length<=24;more.textContent='Vis alle '+hits.length+' racer';clear.hidden=!search.value;cards.querySelectorAll('.cardhead').forEach(button=>button.addEventListener('click',()=>{const detail=document.getElementById(button.getAttribute('aria-controls'));const open=button.getAttribute('aria-expanded')!=='true';button.setAttribute('aria-expanded',String(open));detail.hidden=!open;button.querySelector('.expand').textContent=open?'Skjul kilder ▴':'Vis størrelse, variation og kilder ▾'}))}
+function match(v){if(active==='known')return v.back!==null;if(active==='special')return hasSpecial(v);if(active==='study')return v.n_study>0;if(active==='table')return v.n_tables>0;if(active==='producer')return v.quality==='KUN PRODUCENT';if(active==='conflict')return v.quality==='KILDER UENIGE';if(active==='coat')return v.back===null&&!!v.coatGuides?.length;if(active==='missing')return v.back===null;if(active==='own')return mzOwnFor(v.name).length>0;return true}
+function render(){const query=normalize(search.value),hits=mzData().filter(x=>match(x)&&(!query||[x.name,x.nameDa,x.nameEn,...(x.aliases||[])].some(alias=>normalize(alias).includes(query))));const rank=v=>{if(!query)return 10;const n=normalize(v.name),al=[v.nameDa,v.nameEn,...(v.aliases||[])].map(normalize);if(n===query)return 0;if(al.includes(query))return 1;if(n.startsWith(query))return 2;if(al.some(s=>s.startsWith(query)))return 3;if(n.includes(query))return 4;return 5};if(query)hits.sort((a,b)=>rank(a)-rank(b)||((b.back!==null)-(a.back!==null))||a.name.localeCompare(b.name,'da'));const selected=query?hits:showAll?hits:hits.slice(0,24);count.textContent=hits.length+' racer og varianter ('+hits.filter(v=>v.back!==null).length+' med rygmålsestimat · '+hits.filter(v=>v.back===null&&v.coatGuides?.length).length+' med modelvalg)'+(query?' fundet':' · klik på en race for flere oplysninger');cards.innerHTML=selected.length?selected.map(card).join(''):'<div class="empty">Ingen resultater. Prøv et kortere racenavn eller vælg Alle racer.</div>';more.hidden=!!query||showAll||hits.length<=24;more.textContent='Vis alle '+hits.length+' racer';clear.hidden=!search.value;cards.querySelectorAll('.cardhead').forEach(button=>button.addEventListener('click',()=>{const detail=document.getElementById(button.getAttribute('aria-controls'));const open=button.getAttribute('aria-expanded')!=='true';button.setAttribute('aria-expanded',String(open));detail.hidden=!open;button.querySelector('.expand').textContent=open?'Skjul kilder ▴':'Vis størrelse, variation og kilder ▾'}))}
 search.addEventListener('input',()=>{showAll=false;render()});clear.addEventListener('click',()=>{search.value='';search.focus();showAll=false;render()});document.getElementById('filters').addEventListener('click',e=>{let b=e.target.closest('button[data-filter]');if(!b)return;active=b.dataset.filter;showAll=false;document.querySelectorAll('#filters button').forEach(x=>x.classList.toggle('active',x===b));render()});more.addEventListener('click',()=>{showAll=true;render()});document.getElementById('methodbutton').addEventListener('click',()=>document.getElementById('method').scrollIntoView({behavior:'smooth',block:'start'}));render();
 async function mzSyncCustomerData(){
  // The initial data is embedded as a reliable fallback. Read JSON only, never execute staff-page code.
