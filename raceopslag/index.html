@@ -508,7 +508,7 @@ function coatGuideMarkup(v){
  const guides=v.coatGuides||[];
  if(!guides.length)return '';
  return '<section class="mz-coat-guide"><h3>Racespecifikke produktstørrelser – ikke målte rygmål</h3>'
-   +guides.map(g=>'<div><strong>'+esc(g.maker)+'</strong> · '+esc(g.model||'Dækken')+'<div>'+g.sizes.map(x=>'<span class="mz-coat-chip">'+num(x)+' cm</span>').join('')+'</div><a href="'+esc(g.url)+'" target="_blank" rel="noopener noreferrer">Se kildens størrelsestabel</a><p>'+esc(g.note||'Vejledende modelstørrelser.')+'</p></div>').join('')
+   +guides.map(g=>'<div><strong>'+esc(g.maker)+'</strong> · '+esc(g.model||'Dækken')+'<div>'+g.sizes.map(x=>'<span class="mz-coat-chip">'+esc(typeof x==='number'?num(x)+' cm':x)+'</span>').join('')+'</div><a href="'+esc(g.url)+'" target="_blank" rel="noopener noreferrer">Se kildens størrelsestabel</a><p>'+esc(g.note||'Vejledende modelstørrelser.')+'</p></div>').join('')
    +'<p>Mål altid hundens ryg, hals og bryst. Størrelserne gælder denne producent og kan ikke direkte overføres til andre mærker.</p></section>';
 }
 function mzMeasureNow(e){
@@ -532,10 +532,10 @@ document.getElementById('mz-measure-form').addEventListener('submit',mzMeasureNo
 
 function missingCard(v,i){
  const reg=v.registry,regLink=reg&&reg.source==="FCI"?'<a href="'+esc(reg.url)+'" target="_blank" rel="noopener noreferrer">Se FCI-registrering og racestandard</a>':'';
- const coat=v.coatGuides?.[0],available=!!coat;
- const shown=available?(coat.sizes.length>1?num(coat.sizes[0])+'–'+num(coat.sizes[coat.sizes.length-1]):num(coat.sizes[0])):'—';
+ const coat=v.coatGuides?.[0],available=!!coat,modelCode=!!coat&&coat.unit==='model';
+ const shown=available?(modelCode?'Se model':(coat.sizes.length>1?num(coat.sizes[0])+'–'+num(coat.sizes[coat.sizes.length-1]):num(coat.sizes[0]))):'—';
  return '<article class="card missingcard"><div class="mz-race-row"><button type="button" class="cardhead" aria-expanded="false" aria-controls="details-'+i+'"><div class="racecol">'+raceNameMarkup(v)+'<div class="race-meta"><span class="tag warning">Rygmål mangler</span>'+(available?'<span class="tag mz-guide-tag">Modelvalg fundet</span>':'')+mzEntryTag(v)+'<span class="expand">Detaljer <span class="chevron">⌄</span></span></div></div>'
- +'<div class="sizecol"><span class="num unavailable'+(available?' num-guide':'')+'">'+shown+'</span>'+(available?'<span class="unit">cm</span>':'')+'<span class="hint">'+(available?'Dækkenstørrelser':'Ikke beregnet')+'</span></div>'
+ +'<div class="sizecol"><span class="num unavailable'+(available?' num-guide':'')+'">'+shown+'</span>'+(available&&!modelCode?'<span class="unit">cm</span>':'')+'<span class="hint">'+(available?(modelCode?'Producentmodel':'Dækkenstørrelser'):'Ikke beregnet')+'</span></div>'
  +'<div class="rangecol"><strong class="faded">—</strong><small>Intet dokumenteret race-rygmål</small></div>'
  +'<div class="basiscol"><strong>'+(available?'Producentens modelvalg':'Race registreret')+'</strong><small>'+(available?'Ikke målt racegennemsnit':'Intet pålideligt rygmål')+'</small></div></button>'
  +'<button type="button" class="mz-row-register mz-add-one" data-race="'+esc(v.name)+'" aria-label="Registrer størrelse for '+esc(v.name)+'">＋ Registrer</button>'+'</div><div class="details" id="details-'+i+'" hidden><div class="summarybox alert"><strong>'+(available?'Der er en produktstørrelsesguide, men ikke et målt race-rygmål.':'Ingen sikker racebaseret størrelsesanbefaling')+'</strong><p>'+(available?'Størrelserne er forslag til én konkret producentserie. De må ikke opfattes som hundens forventede ryglængde.':'Racen kan findes i opslaget, men vi har ikke et dokumenteret rygmål.')+' Mål altid hunden fra nakke til halerod, og kontroller bryst og hals i den aktuelle models størrelsestabel.</p></div>'
