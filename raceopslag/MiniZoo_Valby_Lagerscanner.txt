@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MiniZoo Raceopslag - Valby lagerscanner
 // @namespace    minizoo-raceopslag-valby-stock
-// @version      1.0.1
+// @version      1.0.2
 // @description  Scanner offentligt Valby-lager fra hundetøjskategorien og sender en tidsstemplet oversigt til MiniZoo Raceopslag.
 // @match        https://www.minizoo.dk/*
 // @match        https://minizoo.dk/*
@@ -97,7 +97,8 @@ function publicValbyStock(doc){
   if(cells.length<2)continue;
   if(!/^(?:Hunter Valby|MiniZoo Valby(?: ApS)?)$/i.test(textOne(cells[0])))continue;
   const cleaned=textOne(cells[1]).replace(/[−–—]/g,'-').replace(/\s+/g,'').replace(',','.');
-  return /^[+-]?\d+(?:\.\d+)?$/.test(cleaned)?Number(cleaned):null;
+  const match=cleaned.match(/^([+-]?\d+(?:\.\d+)?)(?:stk\.?)?$/i);
+  return match?Number(match[1]):null;
  }
  return null;
 }
