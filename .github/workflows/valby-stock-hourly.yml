@@ -6,8 +6,8 @@ on:
     # Hverdage: 10.17-18.17 (ingen scanning kl. 19 eller senere).
     - cron: "17 10-18 * * 1-5"
       timezone: "Europe/Copenhagen"
-    # Weekend: 09.17-14.17 (ingen scanning kl. 15 eller senere).
-    - cron: "17 9-14 * * 0,6"
+    # Weekend: 10.17-15.17 (ingen scanning kl. 16 eller senere).
+    - cron: "17 10-15 * * 0,6"
       timezone: "Europe/Copenhagen"
   workflow_dispatch:
 
@@ -39,7 +39,7 @@ jobs:
           from zoneinfo import ZoneInfo
           import os
           now = datetime.now(ZoneInfo("Europe/Copenhagen"))
-          allowed = (10 <= now.hour <= 18) if now.weekday() < 5 else (9 <= now.hour <= 14)
+          allowed = (10 <= now.hour <= 18) if now.weekday() < 5 else (10 <= now.hour <= 15)
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
               output.write("allowed=" + ("true" if allowed else "false") + "\n")
           print(f"Dansk tid: {now:%A %d-%m-%Y kl. %H:%M}; tilladt scanning: {allowed}")
