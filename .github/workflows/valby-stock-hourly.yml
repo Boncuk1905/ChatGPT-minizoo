@@ -35,14 +35,64 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests==2.32.5 beautifulsoup4==4.14.2
       - name: Scan MiniZoo Hundetøj og Valby-lager
         run: python raceopslag/valby_hourly_scanner.py
-      - name: Gem lagerudtræk
+      - name: Kontrollér lagerfiler
+        shell: bash
         run: |
+          set -euo pipefail
+          echo "Kontrollerer de to JSON-filer efter scanningen..."
+          for file in raceopslag/valby-hourly-stock.json raceopslag/valby-product-catalog.json; do
+            if [ ! -s "$file" ]; then
+              echo "::error title=Mangler lagerfil::$file blev ikke oprettet eller er tom"
+              exit 1
+            fi
+            ls -lh "$file"
+          done
+          python -m json.tool raceopslag/valby-hourly-stock.json >/dev/null
+          python -m json.tool raceopslag/valby-product-catalog.json >/dev/null
+
+      - name: Gem lagerudtræk
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add raceopslag/valby-hourly-stock.json raceopslag/valby-product-catalog.json
+          echo "Lokal git-status før gemning:"
+          git status --short
+          git add --force raceopslag/valby-hourly-stock.json raceopslag/valby-product-catalog.json
+
           if git diff --cached --quiet; then
             echo "Ingen lagerændringer at gemme."
-          else
-            git commit -m "Valby lagerstatus: automatisk timekontrol [skip ci]"
-            git push
+            exit 0
           fi
+
+          git commit -m "Valby lagerstatus: automatisk timekontrol [skip ci]"
+          for attempt in 1 2 3; do
+            echo "Gemmer lagerudtræk til main (forsøg $attempt/3)..."
+            if git push origin HEAD:main; then
+              echo "Lagerfil gemt og offentliggjort på GitHub."
+              exit 0
+            fi
+            echo "::warning title=Push fejlede::GitHub afviste push. Forsøger at hente eventuelle samtidige ændringer."
+            git fetch origin main
+            if ! git rebase origin/main; then
+              git rebase --abort || true
+              echo "::error title=Git-konflikt::Kunne ikke automatisk flette lageropdateringen"
+              exit 1
+            fi
+            sleep 3
+          done
+          echo "::error title=GitHub skriverettighed mangler?::Kunne ikke gemme til main. Kontrollér Settings > Actions > General > Workflow permissions > Read and write permissions, og eventuel branch protection."
+          exit 1
+
+      - name: Gem scanneresultat som backup ved fejl
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: valby-scanning-${{ github.run_id }}
+          path: |
+            raceopslag/valby-hourly-stock.json
+            raceopslag/valby-product-catalog.json
+          if-no-files-found: warn
+          retention-days: 7
