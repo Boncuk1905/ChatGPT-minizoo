@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MiniZoo Raceopslag - Valby lagerscanner
 // @namespace    minizoo-raceopslag-valby-stock
-// @version      1.0.0
+// @version      1.0.1
 // @description  Scanner offentligt Valby-lager fra hundetøjskategorien og sender en tidsstemplet oversigt til MiniZoo Raceopslag.
 // @match        https://www.minizoo.dk/*
 // @match        https://minizoo.dk/*
@@ -103,7 +103,8 @@ function publicValbyStock(doc){
 }
 function validApparel(title){
  const t=lower(title);
- if(/(?:halsbånd|hundesele|snor\b|hundesko|hundestøvle|potevoks|hundeseng|liggeunderlag|legetøj|fodertøj|hunderedningsvest)/i.test(t))return false;
+ if(/(?:hundesko|hundestøvle|potevoks|hundeseng|liggeunderlag|legetøj|fodertøj|hunderedningsvest)/i.test(t))return false;
+ if(/(?:halsbånd|hundesele|snor\b)/i.test(t)&&!/(?:dækken|daekken|frakke|jakke|pullover|strik|sweater|trøje|troeje|tørre|toerre|fleece|vest|regn|anorak|thermo|termo|vinter|coat)/i.test(t))return false;
  return /(dækken|daekken|frakke|jakke|pullover|strik|sweater|trøje|troeje|tørre|toerre|fleece|vest|regn|anorak|thermo|termo|vinter|coat)/i.test(t);
 }
 function sizeFrom(str){
