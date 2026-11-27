@@ -305,6 +305,16 @@ h1{font-size:clamp(27px,5.7vw,39px);line-height:1.1;letter-spacing:-.025em;margi
 @media(max-width:620px){.mz-stock-panel{padding:10px}.mz-stock-size-form label{flex:1}.mz-stock-size-form button{flex:1}.mz-stock-item{padding:8px}}
 
 .tag.mz-stock-badge{background:#dff5e7;color:#106249;white-space:nowrap}
+
+.mz-stock-changes{margin:8px 0 0}
+.mz-stock-changes details{border-top:1px solid #d5e7e4;padding:9px 0 0;font-size:12px}
+.mz-stock-changes summary{cursor:pointer;font-weight:800;color:#3a646e}
+.mz-stock-changes ul{list-style:none;padding:0;margin:6px 0 0;max-height:230px;overflow:auto}
+.mz-stock-changes li{border-top:1px solid #e1eceb;padding:7px 0;font-size:11px}
+.mz-stock-changes li a{font-weight:750}
+.mz-stock-changes .sold{color:#ae3d3d;font-weight:750}
+.mz-stock-changes .less{color:#89621e}
+.mz-stock-changes .more{color:#267b5b}
 </style>
 </head>
 <body>
@@ -358,6 +368,7 @@ h1{font-size:clamp(27px,5.7vw,39px);line-height:1.1;letter-spacing:-.025em;margi
   <button type="submit">Find på Valby-lager</button>
  </form>
  <div id="mz-stock-results" aria-live="polite"></div>
+ <div id="mz-stock-changes" class="mz-stock-changes" aria-live="polite"></div>
 </section>
 
 <div class="race-name-explainer">Søg på dansk eller engelsk racenavn. Begge navne viser samme race og samme størrelsesoplysninger. Både DA og EN vises på alle rækker – også når navnet er ens. Mærket 'int. navn' betyder, at vi ikke har dokumenteret et særskilt dansk racenavn. <a href="https://www.dkk.dk/uploads/documents/Udstilling-Events/Katalogfiler/Gruppeliste-til-katalog-2026-FCI-og-NKU.pdf" target="_blank" rel="noopener noreferrer">Kilde: Dansk Kennel Klub, 2026</a>.</div>
@@ -624,6 +635,23 @@ function mzStockStamp(){
  const age=(Date.now()-new Date(mzStockSnapshot.scannedAt).getTime())/3600000;
  return '<p class="mz-stock-time">'+(incomplete?'OBS: Scanningen var delvis; der kan mangle produkter. ':'')+(age>24?'OBS: Lagerudtrækket er over 24 timer gammelt. ':'')+'Senest scannet '+esc(mzStockDate(mzStockSnapshot.scannedAt))+'. Lager ændrer sig ved salg – kontrollér varen inden du lover den til kunden.</p>';
 }
+
+function mzStockChanges(){
+ const panel=mzStockStatus('mz-stock-changes');
+ if(!panel)return;
+ const changes=(mzStockSnapshot?.changes||[]).filter(x=>x&&Number.isFinite(Number(x.before))&&Number.isFinite(Number(x.after))&&x.before!==x.after).slice(0,20);
+ if(!changes.length){panel.innerHTML='';return}
+ const items=changes.map(x=>{
+  let link='';
+  try{const u=new URL(String(x.url||''));if(u.protocol==='https:'&&['www.minizoo.dk','minizoo.dk'].includes(u.hostname)&&u.pathname.startsWith('/p/'))link=u.href}catch{}
+  const to=Number(x.after),from=Number(x.before);
+  const css=to===0?'sold':to<from?'less':'more';
+  const label=to===0?'Udsolgt':to<from?'Fald i lager':'Lager øget';
+  const title=esc(String(x.title||'Produkt'));
+  return '<li><span class="'+css+'">'+label+': '+num(from)+' → '+num(to)+' stk.</span> · '+(link?'<a href="'+esc(link)+'" target="_blank" rel="noopener noreferrer">'+title+'</a>':title)+' <span class="small">'+esc(mzStockDate(x.at))+'</span></li>';
+ });
+ panel.innerHTML='<details><summary>Ændringer i Valby-lager ('+changes.length+' seneste)</summary><ul>'+items.join('')+'</ul><p class="mz-stock-time">Registreret ved de planlagte kontroller. Et fald er ikke nødvendigvis et salg; det kan også skyldes lagerrettelser.</p></details>';
+}
 function mzStockManual(){
  const val=String(mzStockStatus('mz-stock-size').value||'').replace(',','.'),size=Number(val);
  const node=mzStockStatus('mz-stock-results');
@@ -654,7 +682,7 @@ function mzStockAccept(raw){
  const value=mzStockVerify(raw);
  mzStockSnapshot=value;
  try{localStorage.setItem(MZ_STOCK_KEY,JSON.stringify(value))}catch(err){alert('Kunne ikke gemme lagerudtræk i browseren: '+err.message)}
- mzStockRefresh();mzStockManual();render();
+ mzStockRefresh();mzStockManual();mzStockChanges();render();
 }
 
 async function mzStockAutoUpdate(force=false){
@@ -685,6 +713,7 @@ async function mzStockAutoUpdate(force=false){
 }
 mzStockLoad();
 mzStockRefresh();
+mzStockChanges();
 mzStockStatus('mz-stock-auto').addEventListener('click',()=>mzStockAutoUpdate(true));
 mzStockAutoUpdate(true);
 if(typeof setInterval==='function')setInterval(()=>{if(!document.hidden)mzStockAutoUpdate(false)},15*60*1000);
@@ -713,7 +742,7 @@ mzStockStatus('mz-stock-import').addEventListener('change',async e=>{
 mzStockStatus('mz-stock-clear').addEventListener('click',()=>{
  if(!confirm('Vil du rydde det lokale lagerudtræk? Dine raceregistreringer bliver ikke ændret.'))return;
  mzStockSnapshot=null;try{localStorage.removeItem(MZ_STOCK_KEY)}catch{}
- mzStockRefresh();mzStockManual();render();
+ mzStockRefresh();mzStockManual();mzStockChanges();render();
 });
 mzStockManual();
 
