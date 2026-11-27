@@ -304,6 +304,7 @@ h1{font-size:clamp(27px,5.7vw,39px);line-height:1.1;letter-spacing:-.025em;margi
 .mz-stock-breed .mz-stock-list{grid-template-columns:repeat(auto-fit,minmax(min(100%,235px),1fr));margin:7px 0}
 @media(max-width:620px){.mz-stock-panel{padding:10px}.mz-stock-size-form label{flex:1}.mz-stock-size-form button{flex:1}.mz-stock-item{padding:8px}}
 
+.tag.mz-stock-badge{background:#dff5e7;color:#106249;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -630,6 +631,12 @@ function mzStockManual(){
  +(hits.length?mzStockItems(hits):'<p class="mz-stock-empty">Ingen varer i denne størrelse med positivt lager i det seneste udtræk. Det er ikke en live lagerkontrol.</p>')
  +mzStockStamp();
 }
+
+function mzStockBadge(v){
+ if(!mzStockSnapshot||v.back===null||!Number.isFinite(v.back))return '';
+ const n=mzStockMatches(round5(v.back)).length;
+ return '<span class="tag mz-stock-badge">'+n+' Valby-varer</span>';
+}
 function mzStockForRace(v){
  if(!mzStockSnapshot)return '<section class="mz-stock-breed"><h3>Valby-lager</h3><div class="mz-stock-empty">Scan Hundetøj fra feltet ovenfor for at se, hvilke størrelser Valby har på lager.</div></section>';
  if(v.back===null||!Number.isFinite(v.back))return '<section class="mz-stock-breed"><h3>Valby-lager</h3><p class="small">Ingen dokumenteret rygstørrelse til denne race. Mål hunden, og brug størrelsessøgningen ovenfor.</p>'+mzStockStamp()+'</section>';
@@ -701,7 +708,7 @@ function card(v,i){if(v.back===null||!Number.isFinite(v.back))return missingCard
  const rangeText=range?`${num(v.lo)}–${num(v.hi)}`:'—';
  const basis=v.n_study?`${v.n_study} studie${v.n_study===1?'':'r'}`:v.n_tables?`${v.n_tables} racetabel${v.n_tables===1?'':'ler'}`:`${v.n_prods} producentguide${v.n_prods===1?'':'r'}`;
  return `<article class="card"><div class="mz-race-row"><button type="button" class="cardhead" aria-expanded="false" aria-controls="details-${i}" aria-label="${esc(v.name)}. ${special?'Vejledende rygmål':'Vejledende startstørrelse'} ${large} cm. Vis detaljer">
- <div class="racecol">${raceNameMarkup(v)}<div class="race-meta"><span class="tag ${type}">${esc(label)}</span>${special?'<span class="tag special">Specialpasform</span>':''}${mzEntryTag(v)}${mzGravhundInline(v)}<span class="expand">Detaljer <span class="chevron">⌄</span></span></div></div>
+ <div class="racecol">${raceNameMarkup(v)}<div class="race-meta"><span class="tag ${type}">${esc(label)}</span>${special?'<span class="tag special">Specialpasform</span>':''}${mzEntryTag(v)}${mzStockBadge(v)}${mzGravhundInline(v)}<span class="expand">Detaljer <span class="chevron">⌄</span></span></div></div>
  <div class="sizecol"><span class="num">${large}</span><span class="unit">cm</span><span class="hint">${special?'Ca. rygmål':'Vejl. str.'}</span></div>
  <div class="rangecol"><strong class="${range?'':'faded'}">${rangeText}</strong>${range?'<small>cm · kildeinterval</small>':'<small>Intet raceinterval</small>'}</div>
  <div class="basiscol"><strong>${esc(basis)}</strong><small>${special?'Specialmål efter model':stud?'Målt undersøgelse':`Beregnet rygmål ca. ${est} cm`}</small></div>
