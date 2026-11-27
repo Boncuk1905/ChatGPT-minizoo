@@ -362,7 +362,7 @@ h1{font-size:clamp(27px,5.7vw,39px);line-height:1.1;letter-spacing:-.025em;margi
   <label for="mz-stock-import" class="mz-stock-import">Indlæs lager-JSON</label><input id="mz-stock-import" type="file" accept=".json,application/json" hidden>
   <button type="button" id="mz-stock-clear">Ryd lagerudtræk</button>
  </div>
- <div class="mz-stock-help"><b>Automatisk lagerkontrol:</b> fuld scanning kl. 08.17 og genkontrol af registrerede lagervarer kl. 10.23, 12.23, 14.23, 16.23 og 18.23 (dansk tid), når GitHub-jobbet fungerer. Guiden henter seneste udtræk fra GitHub. <b>Scan MiniZoo Hundetøj</b> og JSON-import er reservefunktioner. Resultatet er aldrig en live lagerreservation.</div>
+ <div class="mz-stock-help"><b>Automatisk lagerkontrol:</b> planlagt én gang hver time omkring minut 17 (GitHub kan være forsinket). Nye varer genfindes normalt én gang i døgnet; eksisterende produkter kontrolleres hver time. Status og ændringer hentes automatisk, også når butikspc’en har været slukket. Guiden henter seneste udtræk fra GitHub. <b>Scan MiniZoo Hundetøj</b> og JSON-import er reservefunktioner. Resultatet er aldrig en live lagerreservation.</div>
  <form id="mz-stock-search" class="mz-stock-size-form">
   <label>Se varer i rygstørrelse <input id="mz-stock-size" type="number" min="15" max="100" step="0.5" inputmode="decimal" value="25" aria-label="Dækkenstørrelse i centimeter"></label>
   <button type="submit">Find på Valby-lager</button>
@@ -587,7 +587,7 @@ document.getElementById('mz-measure-form').addEventListener('submit',mzMeasureNo
 
 
 const MZ_STOCK_KEY='mz-race-valby-lager-v1';
-const MZ_STOCK_REMOTE_URL='https://raw.githubusercontent.com/Boncuk1905/ChatGPT-minizoo/main/raceopslag/valby-lager.json';
+const MZ_STOCK_REMOTE_URL='https://raw.githubusercontent.com/Boncuk1905/ChatGPT-minizoo/main/raceopslag/valby-hourly-stock.json';
 let mzAutoStockLastAttempt=0,mzAutoStockBusy=false;
 const MZ_SCANNER_TYPE='MZ_RACE_VALBY_STOCK_V1';
 const MZ_STOCK_CATEGORY='https://www.minizoo.dk/Hunde/Hundetoej-til-alle-hunde-med-varme-daekkener-og-sko';
@@ -610,7 +610,7 @@ function mzStockVerify(data){
   seen.add(key);
   products.push({size,stock,title,url:u.href,productId:String(raw.productId||'').slice(0,40)});
  }
- return {schema:'mz-valby-race-stock-v1',scannedAt:date.toISOString(),complete:data.complete===true,category:MZ_STOCK_CATEGORY,mode:data.mode||'manual',stats:data.stats||{},changes:Array.isArray(data.changes)?data.changes.slice(0,60):[],products};
+ return {schema:'mz-valby-race-stock-v1',scannedAt:date.toISOString(),complete:data.complete===true,category:MZ_STOCK_CATEGORY,mode:data.source==='github-actions'?'hourly':(data.mode||'manual'),stats:data.stats||{},changes:Array.isArray(data.changes)?data.changes.slice(0,60):[],products};
 }
 function mzStockLoad(){
  try{const raw=localStorage.getItem(MZ_STOCK_KEY);if(raw)mzStockSnapshot=mzStockVerify(JSON.parse(raw))}catch{mzStockSnapshot=null}
@@ -619,9 +619,9 @@ function mzStockRefresh(){
  const label=mzStockStatus('mz-stock-state');
  if(!mzStockSnapshot){label.textContent='Afventer første automatiske scanning';return}
  const p=mzStockSnapshot;
- label.textContent=p.products.length+' varer på Valby-lager · '+mzStockDate(p.scannedAt)+(p.mode==='full'||p.mode==='refresh'?' · automatisk':' · manuelt')+(p.complete?'':' · Delvis scanning!')+(mzStockTooOld()?' · Forældet!':'');
+ label.textContent=p.products.length+' varer på Valby-lager · '+mzStockDate(p.scannedAt)+(p.mode==='hourly'||p.mode==='full'||p.mode==='refresh'?' · automatisk':' · manuelt')+(p.complete?'':' · Delvis scanning!')+(mzStockTooOld()?' · Forældet!':'');
 }
-function mzStockTooOld(){return !!mzStockSnapshot&&(Date.now()-new Date(mzStockSnapshot.scannedAt).getTime()>24*3600000)}
+function mzStockTooOld(){return !!mzStockSnapshot&&(Date.now()-new Date(mzStockSnapshot.scannedAt).getTime()>3*3600000)}
 function mzStockMatches(size){
  if(!mzStockSnapshot||mzStockTooOld()||!Number.isFinite(size))return[];
  return mzStockSnapshot.products.filter(x=>Math.abs(x.size-size)<0.02).sort((a,b)=>b.stock-a.stock||a.title.localeCompare(b.title,'da-DK'));
@@ -633,7 +633,7 @@ function mzStockStamp(){
  if(!mzStockSnapshot)return '';
  const incomplete=!mzStockSnapshot.complete;
  const age=(Date.now()-new Date(mzStockSnapshot.scannedAt).getTime())/3600000;
- return '<p class="mz-stock-time">'+(incomplete?'OBS: Scanningen var delvis; der kan mangle produkter. ':'')+(age>24?'OBS: Lagerudtrækket er over 24 timer gammelt. ':'')+'Senest scannet '+esc(mzStockDate(mzStockSnapshot.scannedAt))+'. Lager ændrer sig ved salg – kontrollér varen inden du lover den til kunden.</p>';
+ return '<p class="mz-stock-time">'+(incomplete?'OBS: Scanningen var delvis; der kan mangle produkter. ':'')+(age>3?'OBS: Lagerudtrækket er over 3 timer gammelt. ':'')+'Senest scannet '+esc(mzStockDate(mzStockSnapshot.scannedAt))+'. Lager ændrer sig ved salg – kontrollér varen inden du lover den til kunden.</p>';
 }
 
 function mzStockChanges(){
@@ -648,7 +648,7 @@ function mzStockChanges(){
   const css=to===0?'sold':to<from?'less':'more';
   const label=to===0?'Udsolgt':to<from?'Fald i lager':'Lager øget';
   const title=esc(String(x.title||'Produkt'));
-  return '<li><span class="'+css+'">'+label+': '+num(from)+' → '+num(to)+' stk.</span> · '+(link?'<a href="'+esc(link)+'" target="_blank" rel="noopener noreferrer">'+title+'</a>':title)+' <span class="small">'+esc(mzStockDate(x.at))+'</span></li>';
+  return '<li><span class="'+css+'">'+label+': '+num(from)+' → '+num(to)+' stk.</span> · '+(link?'<a href="'+esc(link)+'" target="_blank" rel="noopener noreferrer">'+title+'</a>':title)+' <span class="small">'+esc(mzStockDate(x.at||mzStockSnapshot.scannedAt))+'</span></li>';
  });
  panel.innerHTML='<details><summary>Ændringer i Valby-lager ('+changes.length+' seneste)</summary><ul>'+items.join('')+'</ul><p class="mz-stock-time">Registreret ved de planlagte kontroller. Et fald er ikke nødvendigvis et salg; det kan også skyldes lagerrettelser.</p></details>';
 }
@@ -657,7 +657,7 @@ function mzStockManual(){
  const node=mzStockStatus('mz-stock-results');
  if(!val||!Number.isFinite(size)||size<15||size>100){node.textContent='Indtast en størrelse mellem 15 og 100 cm.';return}
  if(!mzStockSnapshot){node.innerHTML='<div class="mz-stock-empty">Ingen lagerdata endnu. Den automatiske scanning er endnu ikke gennemført, eller data kunne ikke hentes. Du kan også scanne manuelt.</div>';return}
- if(mzStockTooOld()){node.innerHTML='<div class="mz-stock-empty">Seneste lagerkontrol er over 24 timer gammel. Lagerantal skjules, indtil en nyere scanning er indlæst.</div>'+mzStockStamp();return}
+ if(mzStockTooOld()){node.innerHTML='<div class="mz-stock-empty">Seneste lagerkontrol er over 3 timer gammel. Lagerantal skjules, indtil en nyere scanning er indlæst.</div>'+mzStockStamp();return}
  const hits=mzStockMatches(size);
  node.innerHTML='<strong>'+hits.length+' produkter i str. '+num(size)+' cm på Valby-lager ved scanningen</strong>'
  +(hits.length?mzStockItems(hits):'<p class="mz-stock-empty">Ingen varer i denne størrelse med positivt lager i det seneste udtræk. Det er ikke en live lagerkontrol.</p>')
