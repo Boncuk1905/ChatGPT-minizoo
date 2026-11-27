@@ -279,6 +279,31 @@ h1{font-size:clamp(27px,5.7vw,39px);line-height:1.1;letter-spacing:-.025em;margi
 .mz-measure-table a{font-weight:760}
 .mz-measure-warning{font-size:11px;color:#6e7680;line-height:1.4;margin:8px 0}
 @media(max-width:620px){.missingcard .num-guide{font-size:19px}.mz-measure-table{font-size:11px}.mz-measure-fields button{flex:1 1 100%}}
+
+/* Lagerudtræk for MiniZoo Valby (internt og lokalt, ikke kundeversion) */
+.mz-stock-panel{border:1px solid #b8d9d3;background:#f8fcfb;border-radius:14px;padding:14px;margin:12px 0 15px}
+.mz-stock-title{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.mz-stock-title strong{font-size:15px;color:#0b6962}
+#mz-stock-state{font-size:11px;color:#55737e}
+.mz-stock-panel>p,.mz-stock-help{font-size:11px;line-height:1.55;color:#567179;margin:8px 0}
+.mz-stock-actions{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+.mz-stock-actions button,.mz-stock-actions a,.mz-stock-import{border:1px solid #a8c9c6;background:white;color:#24655f;border-radius:8px;padding:9px 10px;font-size:12px;font-weight:780;text-decoration:none;cursor:pointer}
+.mz-stock-actions .mz-stock-primary{background:#087e79;color:#fff;border-color:#087e79}
+.mz-stock-size-form{display:flex;align-items:end;gap:9px;margin:12px 0 7px;flex-wrap:wrap}
+.mz-stock-size-form label{font-size:12px;font-weight:760;color:#355b63;display:flex;align-items:center;gap:8px}
+.mz-stock-size-form input{width:85px;height:38px;border:1px solid #a8c5c7;border-radius:8px;background:#fff;padding:6px 9px;font-size:16px}
+.mz-stock-size-form button{background:#087e79;border:0;border-radius:8px;color:#fff;padding:10px 12px;font-size:12px;font-weight:750}
+.mz-stock-empty{font-size:12px;color:#657f8a;padding:10px 0}
+.mz-stock-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:7px;margin:10px 0}
+.mz-stock-item{display:flex;align-items:start;gap:8px;padding:9px 10px;border:1px solid #d5e8e4;background:#fff;border-radius:9px;font-size:12px;text-decoration:none;color:#174e59}
+.mz-stock-item strong{display:block;color:#154e58;font-size:12px;line-height:1.32}
+.mz-stock-item .mz-stock-qty{font-size:11px;font-weight:800;color:#087263;margin-top:3px}
+.mz-stock-time{font-size:10px;color:#58727e;margin-top:7px;line-height:1.4}
+.mz-stock-breed{margin:13px 0;padding:11px 12px;background:#edf8f4;border:1px solid #cfe7df;border-radius:11px}
+.mz-stock-breed h3{margin:0 0 4px;color:#17675d;font-size:13px}
+.mz-stock-breed .mz-stock-list{grid-template-columns:repeat(auto-fit,minmax(min(100%,235px),1fr));margin:7px 0}
+@media(max-width:620px){.mz-stock-panel{padding:10px}.mz-stock-size-form label{flex:1}.mz-stock-size-form button{flex:1}.mz-stock-item{padding:8px}}
+
 </style>
 </head>
 <body>
@@ -315,6 +340,24 @@ h1{font-size:clamp(27px,5.7vw,39px);line-height:1.1;letter-spacing:-.025em;margi
     <div id="mz-measure-results" role="status" aria-live="polite"></div>
   </div>
 </details>
+
+
+<section class="mz-stock-panel" id="mz-stock-panel" aria-label="Valby lager og størrelser">
+ <div class="mz-stock-title"><strong>🏬 Hundetøj på lager i Valby</strong><span id="mz-stock-state">Intet lagerudtræk indlæst</span></div>
+ <p>Find alle dækkener og hundejakker i en bestemt rygstørrelse, som havde <b>positivt Hunter Valby-lager</b> ved seneste scanning. Kun til internt butiksbrug.</p>
+ <div class="mz-stock-actions">
+  <button type="button" class="mz-stock-primary" id="mz-stock-start">Scan MiniZoo Hundetøj</button>
+  <a id="mz-stock-script" href="./MiniZoo_Valby_Lagerscanner.txt" download="MiniZoo_Valby_Lagerscanner.txt">Hent scanner (.txt)</a>
+  <label for="mz-stock-import" class="mz-stock-import">Indlæs lager-JSON</label><input id="mz-stock-import" type="file" accept=".json,application/json" hidden>
+  <button type="button" id="mz-stock-clear">Ryd lagerudtræk</button>
+ </div>
+ <div class="mz-stock-help">Første gang: installer scannerens .txt-fil i Userscripts på MiniZoo.dk. Derefter åbner <b>Scan MiniZoo Hundetøj</b> kategorien og starter scanningen. Hvis den automatiske overførsel ikke virker, hent JSON-backup fra MiniZoo-scanneren og indlæs den her. Lagerdata gemmes kun på denne enhed.</div>
+ <form id="mz-stock-search" class="mz-stock-size-form">
+  <label>Se varer i rygstørrelse <input id="mz-stock-size" type="number" min="15" max="100" step="0.5" inputmode="decimal" value="25" aria-label="Dækkenstørrelse i centimeter"></label>
+  <button type="submit">Find på Valby-lager</button>
+ </form>
+ <div id="mz-stock-results" aria-live="polite"></div>
+</section>
 
 <div class="race-name-explainer">Søg på dansk eller engelsk racenavn. Begge navne viser samme race og samme størrelsesoplysninger. Både DA og EN vises på alle rækker – også når navnet er ens. Mærket 'int. navn' betyder, at vi ikke har dokumenteret et særskilt dansk racenavn. <a href="https://www.dkk.dk/uploads/documents/Udstilling-Events/Katalogfiler/Gruppeliste-til-katalog-2026-FCI-og-NKU.pdf" target="_blank" rel="noopener noreferrer">Kilde: Dansk Kennel Klub, 2026</a>.</div>
 <div class="bar"><span id="count" aria-live="polite">Viser racer…</span><button id="methodbutton" type="button">Sådan beregnes tallene</button></div>
@@ -530,6 +573,106 @@ function mzMeasureNow(e){
 document.getElementById('mz-measure-form').addEventListener('submit',mzMeasureNow);
 
 
+
+const MZ_STOCK_KEY='mz-race-valby-lager-v1';
+const MZ_SCANNER_TYPE='MZ_RACE_VALBY_STOCK_V1';
+const MZ_STOCK_CATEGORY='https://www.minizoo.dk/Hunde/Hundetoej-til-alle-hunde-med-varme-daekkener-og-sko';
+let mzStockSnapshot=null,mzScanPopup=null,mzScanToken='';
+const mzStockStatus=id=>document.getElementById(id);
+function mzStockDate(iso){try{return new Date(iso).toLocaleString('da-DK',{dateStyle:'short',timeStyle:'short'})}catch{return iso||'Ukendt'}}
+function mzStockVerify(data){
+ if(!data||typeof data!=='object'||data.schema!=='mz-valby-race-stock-v1'||!Array.isArray(data.products)||data.products.length>2000)throw Error('Ugyldig lagerscanner-fil');
+ const date=new Date(data.scannedAt);
+ if(!Number.isFinite(date.getTime())||date.getTime()>Date.now()+3600000)throw Error('Lagerudtræk har ugyldig dato');
+ const seen=new Set(),products=[];
+ for(const raw of data.products){
+  if(!raw||typeof raw!=='object')continue;
+  const size=Number(raw.size),stock=Number(raw.stock),url=String(raw.url||''),title=String(raw.title||'').trim();
+  if(!Number.isFinite(size)||size<15||size>100||!Number.isFinite(stock)||stock<=0||stock>100000||!title||title.length>250)continue;
+  let u;try{u=new URL(url)}catch{continue}
+  if(u.protocol!=='https:'||!['www.minizoo.dk','minizoo.dk'].includes(u.hostname)||!u.pathname.startsWith('/p/'))continue;
+  const key=u.pathname.toLowerCase();
+  if(seen.has(key))continue;
+  seen.add(key);
+  products.push({size,stock,title,url:u.href,productId:String(raw.productId||'').slice(0,40)});
+ }
+ return {schema:'mz-valby-race-stock-v1',scannedAt:date.toISOString(),complete:data.complete===true,category:MZ_STOCK_CATEGORY,stats:data.stats||{},products};
+}
+function mzStockLoad(){
+ try{const raw=localStorage.getItem(MZ_STOCK_KEY);if(raw)mzStockSnapshot=mzStockVerify(JSON.parse(raw))}catch{mzStockSnapshot=null}
+}
+function mzStockRefresh(){
+ const label=mzStockStatus('mz-stock-state');
+ if(!mzStockSnapshot){label.textContent='Intet lagerudtræk indlæst';return}
+ const p=mzStockSnapshot;
+ label.textContent=p.products.length+' varer på Valby-lager · '+mzStockDate(p.scannedAt)+(p.complete?'':' · Delvis scanning!');
+}
+function mzStockMatches(size){
+ if(!mzStockSnapshot||!Number.isFinite(size))return[];
+ return mzStockSnapshot.products.filter(x=>Math.abs(x.size-size)<0.02).sort((a,b)=>b.stock-a.stock||a.title.localeCompare(b.title,'da-DK'));
+}
+function mzStockItems(rows){
+ return '<div class="mz-stock-list">'+rows.map(x=>'<a class="mz-stock-item" href="'+esc(x.url)+'" target="_blank" rel="noopener noreferrer"><div><strong>'+esc(x.title)+'</strong><span class="mz-stock-qty">'+num(x.stock)+' stk. Valby · '+num(x.size)+' cm</span></div></a>').join('')+'</div>';
+}
+function mzStockStamp(){
+ if(!mzStockSnapshot)return '';
+ const incomplete=!mzStockSnapshot.complete;
+ const age=(Date.now()-new Date(mzStockSnapshot.scannedAt).getTime())/3600000;
+ return '<p class="mz-stock-time">'+(incomplete?'OBS: Scanningen var delvis; der kan mangle produkter. ':'')+(age>24?'OBS: Lagerudtrækket er over 24 timer gammelt. ':'')+'Senest scannet '+esc(mzStockDate(mzStockSnapshot.scannedAt))+'. Lager ændrer sig ved salg – kontrollér varen inden du lover den til kunden.</p>';
+}
+function mzStockManual(){
+ const val=String(mzStockStatus('mz-stock-size').value||'').replace(',','.'),size=Number(val);
+ const node=mzStockStatus('mz-stock-results');
+ if(!val||!Number.isFinite(size)||size<15||size>100){node.textContent='Indtast en størrelse mellem 15 og 100 cm.';return}
+ if(!mzStockSnapshot){node.innerHTML='<div class="mz-stock-empty">Ingen lagerdata endnu. Scan MiniZoo-kategorien eller indlæs en JSON-backup.</div>';return}
+ const hits=mzStockMatches(size);
+ node.innerHTML='<strong>'+hits.length+' produkter i str. '+num(size)+' cm på Valby-lager ved scanningen</strong>'
+ +(hits.length?mzStockItems(hits):'<p class="mz-stock-empty">Ingen varer i denne størrelse med positivt lager i det seneste udtræk. Det er ikke en live lagerkontrol.</p>')
+ +mzStockStamp();
+}
+function mzStockForRace(v){
+ if(!mzStockSnapshot)return '<section class="mz-stock-breed"><h3>Valby-lager</h3><div class="mz-stock-empty">Scan Hundetøj fra feltet ovenfor for at se, hvilke størrelser Valby har på lager.</div></section>';
+ if(v.back===null||!Number.isFinite(v.back))return '<section class="mz-stock-breed"><h3>Valby-lager</h3><p class="small">Ingen dokumenteret rygstørrelse til denne race. Mål hunden, og brug størrelsessøgningen ovenfor.</p>'+mzStockStamp()+'</section>';
+ const size=round5(v.back),hits=mzStockMatches(size);
+ return '<section class="mz-stock-breed"><h3>Valby – dækkener i str. '+num(size)+' cm</h3><p class="small">'+(hasSpecial(v)?'Specialpasform: Størrelsen er kun til at finde varer. Kontroller særlig gravhundepasform og mellemstørrelser. ':'')+'Forslaget er baseret på racens vejledende størrelse, ikke en måling af kundens hund.</p>'
+ +(hits.length?'<strong>'+hits.length+' produkter med positivt lager ved scanningen</strong>'+mzStockItems(hits):'<p class="mz-stock-empty">Ingen registrerede varer i denne størrelse med positivt Valby-lager i seneste udtræk.</p>')
+ +mzStockStamp()+'</section>';
+}
+function mzStockAccept(raw){
+ const value=mzStockVerify(raw);
+ mzStockSnapshot=value;
+ try{localStorage.setItem(MZ_STOCK_KEY,JSON.stringify(value))}catch(err){alert('Kunne ikke gemme lagerudtræk i browseren: '+err.message)}
+ mzStockRefresh();mzStockManual();render();
+}
+mzStockLoad();
+mzStockRefresh();
+mzStockStatus('mz-stock-search').addEventListener('submit',e=>{e.preventDefault();mzStockManual()});
+mzStockStatus('mz-stock-start').addEventListener('click',()=>{
+ mzScanToken=Array.from(crypto.getRandomValues(new Uint8Array(16))).map(x=>x.toString(16).padStart(2,'0')).join('');
+ const url=new URL(MZ_STOCK_CATEGORY);url.hash='mz-race-stock='+mzScanToken;
+ mzScanPopup=window.open(url.href,'_blank');
+ if(!mzScanPopup){mzStockStatus('mz-stock-state').textContent='Popup blokeret – tillad nye faner og prøv igen.';return}
+ mzStockStatus('mz-stock-state').textContent='MiniZoo er åbnet. Scanneren starter, hvis den er installeret. Alternativt indlæs JSON-backup.';
+});
+window.addEventListener('message',e=>{
+ if(!mzScanToken||!mzScanPopup||e.source!==mzScanPopup||!['https://www.minizoo.dk','https://minizoo.dk'].includes(e.origin))return;
+ const msg=e.data;
+ if(!msg||msg.type!==MZ_SCANNER_TYPE||msg.token!==mzScanToken)return;
+ try{mzStockAccept(msg.payload);mzScanToken=''}catch(err){mzStockStatus('mz-stock-state').textContent='Lagerudtræk blev afvist: '+err.message}
+});
+mzStockStatus('mz-stock-import').addEventListener('change',async e=>{
+ const file=e.target.files?.[0];if(!file)return;
+ try{if(file.size>3000000)throw Error('Fil er større end 3 MB');mzStockAccept(JSON.parse(await file.text()))}
+ catch(err){alert('Lager-JSON kunne ikke indlæses: '+err.message)}
+ finally{e.target.value=''}
+});
+mzStockStatus('mz-stock-clear').addEventListener('click',()=>{
+ if(!confirm('Vil du rydde det lokale lagerudtræk? Dine raceregistreringer bliver ikke ændret.'))return;
+ mzStockSnapshot=null;try{localStorage.removeItem(MZ_STOCK_KEY)}catch{}
+ mzStockRefresh();mzStockManual();render();
+});
+mzStockManual();
+
 function missingCard(v,i){
  const reg=v.registry,regLink=reg&&reg.source==="FCI"?'<a href="'+esc(reg.url)+'" target="_blank" rel="noopener noreferrer">Se FCI-registrering og racestandard</a>':'';
  const coat=v.coatGuides?.[0],available=!!coat,modelCode=!!coat&&coat.unit==='model';
@@ -539,7 +682,7 @@ function missingCard(v,i){
  +'<div class="rangecol"><strong class="faded">—</strong><small>Intet dokumenteret race-rygmål</small></div>'
  +'<div class="basiscol"><strong>'+(available?'Producentens modelvalg':'Race registreret')+'</strong><small>'+(available?'Ikke målt racegennemsnit':'Intet pålideligt rygmål')+'</small></div></button>'
  +'<button type="button" class="mz-row-register mz-add-one" data-race="'+esc(v.name)+'" aria-label="Registrer størrelse for '+esc(v.name)+'">＋ Registrer</button>'+'</div><div class="details" id="details-'+i+'" hidden><div class="summarybox alert"><strong>'+(available?'Der er en produktstørrelsesguide, men ikke et målt race-rygmål.':'Ingen sikker racebaseret størrelsesanbefaling')+'</strong><p>'+(available?'Størrelserne er forslag til én konkret producentserie. De må ikke opfattes som hundens forventede ryglængde.':'Racen kan findes i opslaget, men vi har ikke et dokumenteret rygmål.')+' Mål altid hunden fra nakke til halerod, og kontroller bryst og hals i den aktuelle models størrelsestabel.</p></div>'
- +coatGuideMarkup(v)+'<p class="small">'+esc(v.note||'')+'</p>'+regLink+ownMarkup(v)+'</div></article>';
+ +coatGuideMarkup(v)+'<p class="small">'+esc(v.note||'')+'</p>'+regLink+mzStockForRace(v)+ownMarkup(v)+'</div></article>';
 }
 
 function makerSexGuide(v){
@@ -565,7 +708,7 @@ function card(v,i){if(v.back===null||!Number.isFinite(v.back))return missingCard
  </button><button type="button" class="mz-row-register mz-add-one" data-race="${esc(v.name)}" aria-label="Registrer størrelse for ${esc(v.name)}">＋ Registrer</button></div><div class="details" id="details-${i}" hidden>
  <div class="summarybox ${caution?'alert':''}"><strong>${special?'Særlig pasform – brug den enkelte models størrelser.':'Begynd omkring str. '+num(five)+' cm i almindelige 5 cm-serier.'}</strong><p>${stud?'Målt studiemiddel':'Beregnet raceestimat'}: ca. ${est} cm. ${esc(v.note||'Store individuelle forskelle forekommer.')} Produktets egen størrelsesguide har forrang.</p></div>
  <dl class="facts"><dt>Kildeinterval</dt><dd>${range?`${num(v.lo)}–${num(v.hi)} cm`:'Ingen direkte raceinterval'}</dd><dt>Producenteksempel</dt><dd>${v.producer===null?'Ikke opgivet':`Ca. ${num(v.producer)} cm, modelafhængigt`}</dd><dt>Datagrundlag</dt><dd>${v.n_study} studieregistrering(er), ${v.n_tables} racetabeller, ${v.n_prods} producentguider</dd></dl>
- ${mzGravhundDetail(v)}${fitRows(v)}${makerSexGuide(v)}${coatGuideMarkup(v)}${modelCompare(v)}${ownMarkup(v)}
+ ${mzGravhundDetail(v)}${fitRows(v)}${makerSexGuide(v)}${coatGuideMarkup(v)}${modelCompare(v)}${mzStockForRace(v)}${ownMarkup(v)}
  <h3>Kilder og anbefalinger</h3>${(v.sources||[]).map(sourceRow).join('')}
  </div></article>`;
 }
