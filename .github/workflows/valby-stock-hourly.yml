@@ -5,6 +5,10 @@ on:
     # Each hour at minute 17 UTC (less traffic than at the top of the hour).
     - cron: "17 * * * *"
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/valby-stock-hourly.yml'
+      - 'raceopslag/valby_hourly_scanner.py'
 
 permissions:
   contents: write
