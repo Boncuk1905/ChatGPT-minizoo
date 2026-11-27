@@ -1,0 +1,209 @@
+// ==UserScript==
+// @name         MiniZoo Raceopslag - Valby lagerscanner
+// @namespace    minizoo-raceopslag-valby-stock
+// @version      1.0.0
+// @description  Scanner offentligt Valby-lager fra hundetøjskategorien og sender en tidsstemplet oversigt til MiniZoo Raceopslag.
+// @match        https://www.minizoo.dk/*
+// @match        https://minizoo.dk/*
+// @run-at       document-idle
+// @grant        none
+// ==/UserScript==
+
+(function(){
+'use strict';
+if(window.__mzRaceValbyScanV1)return;
+const ROOT='/Hunde/Hundetoej-til-alle-hunde-med-varme-daekkener-og-sko';
+const GITHUB_ORIGIN='https://boncuk1905.github.io';
+const STORAGE='mz-race-valby-lastscan-v1';
+const MAX_LISTINGS=120,MAX_PRODUCTS=2000,CONCURRENCY=5;
+const norm=s=>String(s??'').replace(/\s+/g,' ').trim();
+const lower=s=>norm(s).toLocaleLowerCase('da-DK');
+const params=new URLSearchParams(location.hash.replace(/^#/,''));
+const token=params.get('mz-race-stock')||'';
+const onCategory=location.pathname.toLowerCase().startsWith(ROOT.toLowerCase());
+if(!onCategory)return;
+window.__mzRaceValbyScanV1=true;
+let stop=false,busy=false,lastSnapshot=null;
+const sleep=t=>new Promise(r=>setTimeout(r,t));
+const categoryURL='https://www.minizoo.dk'+ROOT;
+function canonical(src,base){
+ try{
+  const u=new URL(src,base||location.href);
+  if(!['www.minizoo.dk','minizoo.dk'].includes(u.hostname)||u.protocol!=='https:')return '';
+  u.hostname='www.minizoo.dk';u.hash='';u.searchParams.delete('fbclid');
+  return u.href;
+ }catch{return ''}
+}
+function textOne(el){return norm(el?.textContent)}
+async function getDoc(url){
+ let last;
+ for(let attempt=0;attempt<2;attempt++){
+  const ctrl=new AbortController(),timeout=setTimeout(()=>ctrl.abort(),22000);
+  try{
+   const r=await fetch(url,{credentials:'same-origin',cache:'no-store',signal:ctrl.signal});
+   if(!r.ok)throw Error('HTTP '+r.status);
+   const html=await r.text();
+   if(html.length<500)throw Error('Tom eller ufuldstændig HTML');
+   return new DOMParser().parseFromString(html,'text/html');
+  }catch(err){last=err;if(attempt===0)await sleep(350)}finally{clearTimeout(timeout)}
+ }
+ throw last;
+}
+function productLinks(doc,base){
+ const set=new Set();
+ const box=doc.querySelector('main')||doc.querySelector('#main')||doc.body;
+ for(const a of box.querySelectorAll('a[href]')){
+  const url=canonical(a.getAttribute('href'),base);
+  if(!url)continue;
+  const u=new URL(url);
+  if(/^\/p\/[^/]+/i.test(u.pathname))set.add(url);
+ }
+ return [...set];
+}
+function listingLinks(doc,base){
+ const set=new Set(),current=new URL(base);
+ const box=doc.querySelector('main')||doc.body;
+ for(const a of box.querySelectorAll('a[href]')){
+  const url=canonical(a.getAttribute('href'),base);
+  if(!url)continue;
+  const u=new URL(url),p=u.pathname.toLowerCase(),root=ROOT.toLowerCase();
+  if(p!==root&&!p.startsWith(root+'/'))continue;
+  const isSamePath=p===current.pathname.toLowerCase();
+  const isChild=p.startsWith(current.pathname.toLowerCase().replace(/\/$/,'')+'/');
+  const pagination=isSamePath&&u.searchParams.has('side')&&/^\d+$/.test(u.searchParams.get('side')||'');
+  if((isChild||pagination)&&url!==base)set.add(url);
+ }
+ return [...set];
+}
+function findSpec(doc,labels){
+ const wanted=labels.map(lower);
+ for(const row of doc.querySelectorAll('tr')){
+  const cells=[...row.children].filter(c=>/^(?:TD|TH)$/i.test(c.tagName));
+  for(let i=0;i<cells.length-1;i++){
+   const k=lower(textOne(cells[i])).replace(/:$/,'');
+   if(wanted.includes(k))return textOne(cells[i+1]);
+  }
+ }
+ for(const dt of doc.querySelectorAll('dt')){
+  if(wanted.includes(lower(textOne(dt)).replace(/:$/,'')))return textOne(dt.nextElementSibling);
+ }
+ return '';
+}
+function publicValbyStock(doc){
+ const container=doc.querySelector('#lagerstatus');
+ if(!container)return null;
+ for(const tr of container.querySelectorAll('tr')){
+  const cells=[...tr.children].filter(c=>/^(?:TD|TH)$/i.test(c.tagName));
+  if(cells.length<2)continue;
+  if(!/^(?:Hunter Valby|MiniZoo Valby(?: ApS)?)$/i.test(textOne(cells[0])))continue;
+  const cleaned=textOne(cells[1]).replace(/[−–—]/g,'-').replace(/\s+/g,'').replace(',','.');
+  return /^[+-]?\d+(?:\.\d+)?$/.test(cleaned)?Number(cleaned):null;
+ }
+ return null;
+}
+function validApparel(title){
+ const t=lower(title);
+ if(/(?:halsbånd|hundesele|snor\b|hundesko|hundestøvle|potevoks|hundeseng|liggeunderlag|legetøj|fodertøj|hunderedningsvest)/i.test(t))return false;
+ return /(dækken|daekken|frakke|jakke|pullover|strik|sweater|trøje|troeje|tørre|toerre|fleece|vest|regn|anorak|thermo|termo|vinter|coat)/i.test(t);
+}
+function sizeFrom(str){
+ let s=norm(str).replace(/\b\d{2,3}\s*[x×]\s*\d{2,3}(?:\s*[x×]\s*\d{2,3})?\s*cm\b/gi,' ');
+ s=s.replace(/\b(?:hals|bryst|mave|omkreds|pote|krave)\s*[:.]?\s*\d{2,3}(?:[.,]\d)?(?:\s*[-–]\s*\d{2,3}(?:[.,]\d)?)?\s*cm\b/gi,' ');
+ s=s.replace(/\b\d{2,3}(?:[.,]\d)?\s*[-–]\s*\d{2,3}(?:[.,]\d)?\s*cm\b/gi,' ');
+ let m=s.match(/\b(?:str(?:\.|ørrelse)?|size)\s*[:.]?\s*(\d{2,3}(?:[.,]5)?)\b/i);
+ if(!m)m=s.match(/\b(\d{2,3}(?:[.,]5)?)\s*cm\b/i);
+ if(!m)return null;
+ const n=Number(m[1].replace(',','.'));
+ return n>=15&&n<=100?n:null;
+}
+function inferSize(doc,title){
+ const sizeSpec=findSpec(doc,['Størrelse','Str.','Size']);
+ const dim=findSpec(doc,['Dimensioner','Ryglængde','Rygmål']);
+ return sizeFrom(sizeSpec)??sizeFrom(title)??sizeFrom(dim);
+}
+function imageOf(doc){
+ const m=doc.querySelector('meta[property="og:image"],meta[name="og:image"]');
+ return canonical(m?.content||'',location.href)||'';
+}
+async function scanProduct(url){
+ const doc=await getDoc(url),title=textOne(doc.querySelector('h1'))||norm(doc.querySelector('meta[property="og:title"]')?.content)||textOne(doc.querySelector('title'));
+ if(!validApparel(title))return {skip:true};
+ const size=inferSize(doc,title);
+ if(size===null)return {unmatched:true};
+ const stock=publicValbyStock(doc);
+ if(stock===null)return {unknown:true};
+ const pid=findSpec(doc,['Produkt ID','ProduktID']);
+ if(!(stock>0))return {zero:true};
+ return {row:{title:title.slice(0,200),url,size,stock:Math.floor(stock*100)/100,productId:pid.slice(0,40),image:imageOf(doc)}};
+}
+const panel=document.createElement('section');
+panel.id='mz-race-stock-scanner';
+panel.style.cssText='position:fixed;right:10px;bottom:10px;z-index:2147483644;width:min(385px,calc(100vw - 20px));max-height:85vh;overflow:auto;background:#fff;color:#123b49;border:2px solid #087e79;border-radius:14px;box-shadow:0 10px 40px #0005;font:13px -apple-system,BlinkMacSystemFont,Arial,sans-serif;padding:14px';
+panel.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center"><strong style="font-size:15px">🐶 MiniZoo Valby – dækkenscanner</strong><button id="mzvs-hide" title="Skjul" style="border:0;background:#eee;border-radius:6px;padding:4px 8px">✕</button></div><p style="font-size:12px">Scanner hundetøjskategorien og læser kun offentligt lager for <b>Hunter Valby</b>. Intet lager ændres.</p><div id="mzvs-status" style="font-size:12px;background:#eff8f5;border-radius:8px;padding:8px;margin:9px 0">Klar til scanning.</div><div style="display:flex;gap:7px;flex-wrap:wrap"><button id="mzvs-start" style="background:#087e79;color:#fff;border:0;border-radius:8px;padding:10px 13px;font-weight:bold">Start scanning</button><button id="mzvs-stop" style="border:1px solid #aaa;border-radius:8px;padding:10px 12px" disabled>Stop</button><button id="mzvs-send" style="border:1px solid #087e79;border-radius:8px;padding:10px 12px" disabled>Send til raceguide</button><button id="mzvs-export" style="border:1px solid #aaa;border-radius:8px;padding:10px 12px" disabled>Hent JSON-backup</button></div><div style="font-size:11px;color:#667;margin-top:8px">Gem filen, hvis raceguiden ikke modtager resultatet automatisk. Visning er et tidsstemplet lagerudtræk, ikke en live lagerreservation.</div>';
+document.body.appendChild(panel);
+const $=id=>panel.querySelector('#'+id),status=s=>{$('mzvs-status').textContent=s};
+$('mzvs-hide').addEventListener('click',()=>panel.remove());
+$('mzvs-stop').addEventListener('click',()=>{stop=true;status('Stopper efter de igangværende opslag...')});
+function transfer(){
+ if(!lastSnapshot)return;
+ if(!token||!window.opener||window.opener.closed){status('Scanningen er gemt. Åbn din JSON-backup i raceguiden, eller start fra raceguidens knap.');return}
+ try{
+  window.opener.postMessage({type:'MZ_RACE_VALBY_STOCK_V1',token,payload:lastSnapshot},GITHUB_ORIGIN);
+  status('Resultat sendt til raceguiden. Kontrollér Valby-oversigten derovre; hent gerne en JSON-backup.');
+ }catch(err){status('Automatisk overførsel mislykkedes: '+err.message+'. Hent JSON-backup og indlæs i raceguiden.')}
+}
+function exportSnapshot(){
+ if(!lastSnapshot)return;
+ const json=JSON.stringify(lastSnapshot,null,2),blob=new Blob([json],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download='MiniZoo_Valby_hundetoej_'+new Date().toISOString().slice(0,10)+'.json';
+ document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
+}
+$('mzvs-send').addEventListener('click',transfer);
+$('mzvs-export').addEventListener('click',exportSnapshot);
+async function run(){
+ if(busy)return;busy=true;stop=false;lastSnapshot=null;
+ $('mzvs-start').disabled=true;$('mzvs-stop').disabled=false;$('mzvs-send').disabled=true;$('mzvs-export').disabled=true;
+ const queue=[categoryURL],visited=new Set(),products=new Set();
+ let fail=0,checked=0,unknown=0,unmatched=0,skipped=0,stockPositive=[];
+ try{
+  while(queue.length&&!stop&&visited.size<MAX_LISTINGS){
+   const url=queue.shift();
+   if(visited.has(url))continue;visited.add(url);
+   status('Finder varer i kategorien: '+visited.size+' listesider, '+products.size+' produktlinks...');
+   try{
+    const doc=await getDoc(url);
+    for(const p of productLinks(doc,url))products.add(p);
+    for(const next of listingLinks(doc,url))if(!visited.has(next)&&!queue.includes(next))queue.push(next);
+   }catch(err){fail++;status('Kategori kunne ikke læses: '+String(err.message||err).slice(0,100))}
+  }
+  if(!products.size){status('Ingen produktlinks blev fundet. Kontroller, at kategorisiden viser varer.');return}
+  if(products.size>MAX_PRODUCTS)throw Error('Sikkerhedsgrænse: '+products.size+' produktlinks (maks. '+MAX_PRODUCTS+')');
+  const list=[...products];let cursor=0;
+  async function worker(){
+   while(!stop){
+    const ix=cursor++;if(ix>=list.length)return;
+    try{
+     const result=await scanProduct(list[ix]);
+     if(result.row)stockPositive.push(result.row);
+     else if(result.unknown)unknown++;
+     else if(result.unmatched)unmatched++;
+     else skipped++;
+    }catch{fail++}
+    checked++;
+    if(checked===list.length||checked%10===0)status('Kontrolleret '+checked+'/'+list.length+' varer · '+stockPositive.length+' på Valby-lager · '+fail+' fejl');
+   }
+  }
+  await Promise.all(Array.from({length:Math.min(CONCURRENCY,list.length)},()=>worker()));
+  const complete=!stop&&queue.length===0&&visited.size<MAX_LISTINGS&&fail===0&&checked===list.length;
+  stockPositive.sort((a,b)=>a.size-b.size||a.title.localeCompare(b.title,'da-DK'));
+  lastSnapshot={schema:'mz-valby-race-stock-v1',scannedAt:new Date().toISOString(),category:categoryURL,complete,stats:{listings:visited.size,found:products.size,checked,failed:fail,unknownStock:unknown,withoutSize:unmatched,otherOrOutOfStock:skipped,positive:stockPositive.length},products:stockPositive};
+  try{localStorage.setItem(STORAGE,JSON.stringify(lastSnapshot))}catch{}
+  $('mzvs-send').disabled=false;$('mzvs-export').disabled=false;
+  status((complete?'Færdig':'Delvis scanning')+': '+stockPositive.length+' varer med positivt Valby-lager. '+checked+' gennemgået, '+fail+' fejl. '+(complete?'':'Delvis – kontrollér at produkter ikke mangler!'));
+  if(token)transfer();
+ }catch(err){status('Scanning afbrudt: '+String(err.message||err).slice(0,220))}
+ finally{busy=false;$('mzvs-start').disabled=false;$('mzvs-stop').disabled=true;}
+}
+$('mzvs-start').addEventListener('click',run);
+if(token)run();
+})();
