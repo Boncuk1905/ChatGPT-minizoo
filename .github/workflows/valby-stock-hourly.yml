@@ -6,6 +6,7 @@ on:
     - cron: "17 * * * *"
   workflow_dispatch:
   push:
+    branches: [main]
     paths:
       - '.github/workflows/valby-stock-hourly.yml'
       - 'raceopslag/valby_hourly_scanner.py'
@@ -27,6 +28,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: true
+          ref: main
+          fetch-depth: 0
       - name: Installer Python
         uses: actions/setup-python@v5
         with:
@@ -68,20 +71,20 @@ jobs:
           fi
 
           git commit -m "Valby lagerstatus: automatisk timekontrol [skip ci]"
-          for attempt in 1 2 3; do
-            echo "Gemmer lagerudtræk til main (forsøg $attempt/3)..."
+          for attempt in 1 2 3 4 5; do
+            echo "Henter seneste main og gemmer lagerudtræk (forsøg $attempt/5)..."
+            git fetch origin main:refs/remotes/origin/main
+            if ! git rebase origin/main; then
+              git rebase --abort || true
+              echo "::error title=Git-konflikt::Kunne ikke automatisk flette lageropdateringen; ingen filer overskrives."
+              exit 1
+            fi
             if git push origin HEAD:main; then
               echo "Lagerfil gemt og offentliggjort på GitHub."
               exit 0
             fi
-            echo "::warning title=Push fejlede::GitHub afviste push. Forsøger at hente eventuelle samtidige ændringer."
-            git fetch origin main
-            if ! git rebase origin/main; then
-              git rebase --abort || true
-              echo "::error title=Git-konflikt::Kunne ikke automatisk flette lageropdateringen"
-              exit 1
-            fi
-            sleep 3
+            echo "::warning title=Push fejlede::Forsøger igen med seneste ændringer."
+            sleep $((attempt * 3))
           done
           echo "::error title=GitHub skriverettighed mangler?::Kunne ikke gemme til main. Kontrollér Settings > Actions > General > Workflow permissions > Read and write permissions, og eventuel branch protection."
           exit 1
