@@ -2,14 +2,14 @@ name: MiniZoo Valby - lager hver time
 
 on:
   schedule:
-    # Each hour at minute 17 UTC (less traffic than at the top of the hour).
-    - cron: "17 * * * *"
+    # Dansk lokaltid inkl. automatisk sommertid/vintertid.
+    # Hverdage: 09.17-17.17 (ingen scanning kl. 18 eller senere).
+    - cron: "17 9-17 * * 1-5"
+      timezone: "Europe/Copenhagen"
+    # Weekend: 09.17-14.17 (ingen scanning kl. 15 eller senere).
+    - cron: "17 9-14 * * 0,6"
+      timezone: "Europe/Copenhagen"
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/valby-stock-hourly.yml'
-      - 'raceopslag/valby_hourly_scanner.py'
 
 permissions:
   contents: write
@@ -30,15 +30,36 @@ jobs:
           persist-credentials: true
           ref: main
           fetch-depth: 0
+      - name: Kontrollér dansk scanningstid
+        id: opening_hours
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+          import os
+          now = datetime.now(ZoneInfo("Europe/Copenhagen"))
+          closes = 18 if now.weekday() < 5 else 15
+          allowed = 9 <= now.hour < closes
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write("allowed=" + ("true" if allowed else "false") + "\n")
+          print(f"Dansk tid: {now:%A %d-%m-%Y kl. %H:%M}; tilladt scanning: {allowed}")
+          if not allowed:
+              print("Uden for ønsket tidsrum: Ingen scanning eller lagerændring.")
+          PY
       - name: Installer Python
+        if: steps.opening_hours.outputs.allowed == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - name: Installer HTML-parser
+        if: steps.opening_hours.outputs.allowed == 'true'
         run: python -m pip install --disable-pip-version-check requests==2.32.5 beautifulsoup4==4.14.2
       - name: Scan MiniZoo Hundetøj og Valby-lager
+        if: steps.opening_hours.outputs.allowed == 'true'
         run: python raceopslag/valby_hourly_scanner.py
       - name: Kontrollér lagerfiler
+        if: steps.opening_hours.outputs.allowed == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -54,6 +75,7 @@ jobs:
           python -m json.tool raceopslag/valby-product-catalog.json >/dev/null
 
       - name: Gem lagerudtræk
+        if: steps.opening_hours.outputs.allowed == 'true'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -90,7 +112,7 @@ jobs:
           exit 1
 
       - name: Gem scanneresultat som backup ved fejl
-        if: always()
+        if: ${{ always() && steps.opening_hours.outputs.allowed == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: valby-scanning-${{ github.run_id }}
